@@ -90,6 +90,7 @@ void spike_audio_play_start(const char *path)
 /* Stop VS1053 playback */
 void spike_audio_stop(void)
 {
+    audio_player.resume_needed = 0;  /* cancel any pending resume */
     if (audio_player.playing) {
         audio_player.stop_req = 1;
     }
