@@ -78,7 +78,6 @@ int main(void)
     /* Audio */
     init_show("Audio: checking...");
     spike_audio_init();
-    VS_SPK_Set(1);
     init_result("Audio: OK");
 
     /* Onboard speaker */
