@@ -116,25 +116,42 @@ void spike_loop(void)
             uint32_t dur = HAL_GetTick() - spike.defuse_press_ms;
             spike.defuse_press_ms = 0;
 
-            if (dur < 3500) {
-                spike.defuse_progress = 0.0f;
-                spike.defuse_saved = 0.0f;
-                spike.defuse_half_done = 0;
-                pcm_stop();
-                LED1 = 1;
-                spike_enter_state(STATE_DEPLOYED);
-            } else if (dur < 7000) {
-                spike.defuse_saved = 0.5f;
-                spike.defuse_progress = 0.5f;
-                spike.defuse_half_done = 1;
-                pcm_stop();
-                LED1 = 1;
-                spike_enter_state(STATE_DEPLOYED);
+            if (spike.defuse_half_done) {
+                /* Already saved 50%, need 3.5s more to complete */
+                if (dur >= 3500) {
+                    spike.defuse_progress = 1.0f;
+                    spike_audio_stop();
+                    pcm_stop();
+                    spike_enter_state(STATE_DEFUSED);
+                } else {
+                    /* Keep 50% saved, progress stays at 0.5 */
+                    spike.defuse_progress = 0.5f;
+                    pcm_stop();
+                    LED1 = 1;
+                    spike_enter_state(STATE_DEPLOYED);
+                }
             } else {
-                spike.defuse_progress = 1.0f;
-                spike_audio_stop();
-                pcm_stop();
-                spike_enter_state(STATE_DEFUSED);
+                /* Fresh defuse: need 7s total, 3.5s for half */
+                if (dur < 3500) {
+                    spike.defuse_progress = 0.0f;
+                    spike.defuse_saved = 0.0f;
+                    spike.defuse_half_done = 0;
+                    pcm_stop();
+                    LED1 = 1;
+                    spike_enter_state(STATE_DEPLOYED);
+                } else if (dur < 7000) {
+                    spike.defuse_saved = 0.5f;
+                    spike.defuse_progress = 0.5f;
+                    spike.defuse_half_done = 1;
+                    pcm_stop();
+                    LED1 = 1;
+                    spike_enter_state(STATE_DEPLOYED);
+                } else {
+                    spike.defuse_progress = 1.0f;
+                    spike_audio_stop();
+                    pcm_stop();
+                    spike_enter_state(STATE_DEFUSED);
+                }
             }
             break;
         }
@@ -371,7 +388,7 @@ void spike_lcd_update(void)
         break;
     }
     case STATE_DEPLOYED:
-        spike_draw_progress_bar(0.0f, 1);
+        spike_draw_progress_bar(spike.defuse_progress, 1);
         break;
     case STATE_DEFUSING:
         spike_draw_progress_bar(spike.defuse_progress, 1);
