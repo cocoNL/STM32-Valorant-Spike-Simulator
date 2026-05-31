@@ -4,7 +4,7 @@
 基于正点原子战舰V3（STM32F103ZET6），模拟Valorant游戏中"爆能器（Spike）"的部署、拆除、引爆全过程，含音频播放、LED闪烁、LCD显示及彩蛋系统。
 
 ## Current Phase
-Phase 2
+Phase 3 (待编译验证)
 
 ## Phases
 
@@ -20,21 +20,37 @@ Phase 2
 - **Status:** complete
 
 ### Phase 2: 项目工程搭建
-- [ ] 2.1 从音乐播放器例程复制完整目录结构
-- [ ] 2.2 精简不需要的组件（PICTURE/USMART/FLAC/MALLOC等按需保留）
-- [ ] 2.3 在Keil中配置工程（源文件分组、包含路径、ARM Compiler v5）
-- [ ] 2.4 修改main.c初始化流程适配本项目
-- [ ] 2.5 验证工程可成功编译
-- **Status:** in_progress
+- [x] 2.1 从音乐播放器例程复制完整目录结构
+- [x] 2.2 精简不需要的组件
+- [x] 2.3 在Keil中配置工程（源文件分组、包含路径、ARM Compiler v5）
+- [x] 2.4 修改main.c初始化流程适配本项目
+- [x] 2.5 创建应用层源码（spike.c/h, spike_audio.c/h, pcm_data.c/h）
+- [x] 2.6 配置PWM音频模块（PA8 TIM1_CH1）
+- [x] 2.7 初始化Git仓库并推送GitHub
+- [ ] 2.8 在Keil中编译验证
+- **Status:** complete (待编译验证)
 
 ### Phase 3: 基础驱动适配
-- [ ] 3.1 LED驱动（PB5红色, PE5绿色）
-- [ ] 3.2 KEY驱动（PA0 KEY_UP, PE4 KEY0，适配长按检测）
-- [ ] 3.3 LCD驱动（4.3寸TFTLCD FSMC, GBK24字体）
-- [ ] 3.4 VS1053驱动（SPI1, 含LINE_IN监听配置）
-- [ ] 3.5 SD卡+FATFS（SDIO方式挂载）
-- [ ] 3.6 PWM音频输出（PA8 TIM1_CH1, 含PCM播放ISR）
-- **Status:** pending
+- [x] 3.1 LED驱动（PB5红色, PE5绿色）- 沿用参考代码
+- [x] 3.2 KEY驱动（PA0 KEY_UP, PE4 KEY0）- 沿用+长按检测
+- [x] 3.3 LCD驱动（4.3寸TFTLCD FSMC, GBK24字体）- 沿用参考代码
+- [x] 3.4 VS1053驱动（SPI1, 含LINE_IN监听配置）- 沿用+SM_LINE1
+- [x] 3.5 SD卡+FATFS（SDIO方式挂载）- 沿用参考代码
+- [x] 3.6 PWM音频输出（PA8 TIM1_CH1, TIM2 ISR @11025Hz）
+- **Status:** complete
+
+### Phase 4: 核心应用层实现
+- [x] 4.1 状态机框架（spike.h/c，6状态枚举+转换函数）
+- [x] 4.2 按键处理（长按计时、短按检测、去抖）
+- [x] 4.3 红色LED非阻塞闪烁引擎（6阶段加速规律）
+- [x] 4.4 绿色LED状态控制
+- [x] 4.5 主音频播放（VS1053非阻塞喂数据）
+- [x] 4.6 PCM短音效（TIM2 ISR输出PWM, 合成beep音）
+- [x] 4.7 LCD显示引擎（各状态文字+拆除进度条+xx.xx时间）
+- [x] 4.8 45秒倒计时管理
+- [x] 4.9 拆除进度计算（含50%保留逻辑+剩余时间显示）
+- [x] 4.10 彩蛋系统（随机选曲+KEY0循环切歌+播完不自动切）
+- **Status:** complete
 
 ### Phase 4: 核心应用层实现
 - [ ] 4.1 状态机框架（spike.h/c，6状态枚举+转换函数）
