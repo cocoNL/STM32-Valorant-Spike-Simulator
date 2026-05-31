@@ -1,0 +1,29 @@
+# Keil uVision build outputs
+OBJ/
+*.uvoptx
+*.lst
+*.plg
+*.dep
+*.iex
+*.bak
+*.Administrator
+*.dbgdt
+*.dbgconf
+JLinkLog.txt
+JLinkSettings.ini
+
+# Compiled objects
+*.o
+*.d
+*.crf
+*.dDep
+*.lnp
+*.axf
+*.hex
+*.htm
+*.map
+*.bin
+
+# Editor files
+*.uvguix.*
+*.scvd
