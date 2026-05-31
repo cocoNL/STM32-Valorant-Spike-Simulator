@@ -55,6 +55,7 @@ void spike_loop(void)
     uint32_t hold;
 
     spike_audio_feed();
+    spike_audio_resume_if_needed(spike.countdown_elapsed);
 
     key = KEY_Scan(1);
     hold = key_up_hold_ms();
@@ -250,10 +251,11 @@ static void spike_enter_state(spike_state_t new_state)
     case STATE_DEFUSING:
         spike.defuse_press_ms = HAL_GetTick();
         LED1 = 0;
+        /* Play real MP3: pause planted, play defuse_start, auto-resume */
         if (spike.defuse_half_done)
-            pcm_play_start(pcm_defuse_start_2, pcm_defuse_start_2_len);
+            spike_audio_pause_and_play("0:/SOUNDS/defuse_start_2.mp3");
         else
-            pcm_play_start(pcm_defuse_start_1, pcm_defuse_start_1_len);
+            spike_audio_pause_and_play("0:/SOUNDS/defuse_start_1.mp3");
         LCD_Clear(COLOR_BG);
         spike_draw_progress_bar(spike.defuse_saved);
         Show_Str(BAR_X, 120, 400, 24, (uint8_t *)"\xD5\xFD\xD4\xDA\xB2\xF0\xB3\xFD", 24, 0);

@@ -79,15 +79,14 @@
 
 ### 音频路径（最终方案）
 ```
-[主音频]
-SD卡 MP3 → VS1053解码(SPI1) → TDA1308T → PHONE口 → 外接音箱(3.5mm)
+[主音频 — PHONE口]
+SD卡 MP3 → VS1053解码(SPI1) → TDA1308T → PHONE口 → 外接音箱/耳机
 
-[短音效]
+[短音效 — 板载扬声器]
 PCM数组 → TIM2 ISR(11025Hz) → TIM1 CCR1(PA8 PWM) → 
-R77+C63 RC滤波 → P11(AIN-PDC短接) → TDA1308T+HT6872 → PHONE口 + 板载扬声器
+R77+C63 RC滤波 → P11(AIN-PDC短接) → HT6872功放 → 板载扬声器
 
-[LINE_IN监听]（已配置但本项目不需要外部输入）
-VS1053 SCI_MODE |= SM_LINE1 → LINE_IN输入混入主输出
+两路完全独立，同时播放互不干扰。
 ```
 
 ## Technical Decisions

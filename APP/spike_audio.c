@@ -5,6 +5,7 @@
 #include "pcm_data.h"
 #include "pwmdac.h"
 #include "delay.h"
+#include "string.h"
 
 spike_audio_t audio_player;
 pcm_player_t   pcm_player;
@@ -66,7 +67,7 @@ void spike_audio_play_start(const char *path)
 
     VS_Restart_Play();
     VS_Set_All();
-    VS_SPK_Set(1);  /* ensure speaker ON after reset */
+    VS_SPK_Set(0);  /* long audio → speaker OFF */
     vs_linein_monitor_enable();
     VS_Reset_DecodeTime();
     VS_SPI_SpeedHigh();
@@ -136,6 +137,58 @@ uint8_t spike_audio_is_busy(void)
     return audio_player.playing;
 }
 
+/* Pause current playback and play a short MP3 instead */
+void spike_audio_pause_and_play(const char *short_path)
+{
+    if (!audio_player.playing) {
+        spike_audio_play_start(short_path);
+        return;
+    }
+
+    /* Close current file, flag for time-synced resume */
+    f_close(&audio_player.file);
+    audio_player.playing = 0;
+    audio_player.resume_needed = 1;
+
+    /* Enable speaker for short audio */
+    VS_SPK_Set(1);
+
+    spike_audio_play_start(short_path);
+}
+
+/* Resume planted.mp3 at time-synced position after short audio done */
+void spike_audio_resume_if_needed(uint32_t elapsed_ms)
+{
+    FSIZE_t total, offset;
+
+    if (!audio_player.resume_needed) return;
+    if (audio_player.playing) return;
+
+    /* Short audio done, disable speaker */
+    VS_SPK_Set(0);
+
+    /* Reopen planted.mp3 and seek to position matching elapsed countdown */
+    if (f_open(&audio_player.file, "0:/SOUNDS/planted.mp3", FA_READ) == FR_OK) {
+        total = f_size(&audio_player.file);
+        offset = (FSIZE_t)((float)elapsed_ms / 45000.0f * (float)total);
+        f_lseek(&audio_player.file, offset);
+
+        VS_Restart_Play();
+        VS_Set_All();
+        VS_SPK_Set(0);  /* keep speaker OFF during planted playback */
+        vs_linein_monitor_enable();
+        VS_Reset_DecodeTime();
+        VS_SPI_SpeedHigh();
+
+        audio_player.playing = 1;
+        audio_player.done = 0;
+        audio_player.stop_req = 0;
+        audio_player.buf_pos = 0;
+        audio_player.buf_len = 0;
+    }
+    audio_player.resume_needed = 0;
+}
+
 /* PCM player via PWM (TIM2 ISR) */
 /* TIM2 interrupt - update PWM duty with next PCM sample */
 void TIM2_IRQHandler(void)
@@ -147,6 +200,7 @@ void TIM2_IRQHandler(void)
         } else {
             TIM_SetTIM1Compare1(0);
             pcm_player.playing = 0;
+            VS_SPK_Set(0);  /* disable speaker amp when PCM done */
         }
     }
     __HAL_TIM_CLEAR_IT(&TIM2_Handler, TIM_IT_UPDATE);
@@ -159,6 +213,7 @@ void pcm_play_start(const uint8_t *data, uint32_t len)
     pcm_player.len = len;
     pcm_player.pos = 0;
     pcm_player.playing = 1;
+    VS_SPK_Set(1);  /* enable onboard speaker amp */
 }
 
 /* Stop PCM playback */
@@ -167,6 +222,7 @@ void pcm_stop(void)
     pcm_player.playing = 0;
     pcm_player.pos = 0;
     TIM_SetTIM1Compare1(0);
+    VS_SPK_Set(0);  /* disable onboard speaker amp */
 }
 
 /* Initialize TIM2 for PCM sample rate timing */

@@ -12,6 +12,7 @@ typedef struct {
     uint8_t *buf;           /* 4096-byte read buffer from SRAM */
     uint16_t buf_pos;       /* current position in buffer */
     uint16_t buf_len;       /* valid bytes in buffer */
+    uint8_t resume_needed;  /* 1=need time-synced resume after short */
 } spike_audio_t;
 
 /* PCM player (PWM audio via PA8) */
@@ -31,6 +32,8 @@ void  spike_audio_play_start(const char *path);
 void  spike_audio_stop(void);
 void  spike_audio_feed(void);
 uint8_t spike_audio_is_busy(void);
+void spike_audio_pause_and_play(const char *short_path);  /* pause current, play short */
+void spike_audio_resume_if_needed(uint32_t elapsed_ms);  /* resume at time-synced offset */
 
 /* PCM/PWM audio functions */
 void pcm_timer_init(void);      /* TIM2 at PCM_SAMPLE_RATE for PWM audio */
