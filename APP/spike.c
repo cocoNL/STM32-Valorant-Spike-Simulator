@@ -111,6 +111,14 @@ void spike_loop(void)
             if (spike.defuse_progress > 1.0f) spike.defuse_progress = 1.0f;
         }
 
+        /* Immediately succeed when progress reaches 100% */
+        if (spike.defuse_progress >= 1.0f) {
+            spike_audio_stop();
+            pcm_stop();
+            spike_enter_state(STATE_DEFUSED);
+            break;
+        }
+
         if (hold == 0 && spike.defuse_press_ms > 0) {
             /* Released */
             uint32_t dur = HAL_GetTick() - spike.defuse_press_ms;
