@@ -36,7 +36,7 @@ static const led_phase_t led_phases[6] = {
 static void spike_enter_state(spike_state_t new_state);
 static void spike_draw_progress_bar(float progress, uint8_t show_midline);
 static void spike_lcd_clear_area(uint16_t y, uint16_t h);
-static void spike_update_display_time(void);
+static void spike_update_display_time(const char *prefix);
 static uint32_t key_up_hold_ms(void);
 static uint32_t key1_hold_ms(void);
 static uint8_t key0_released(void);
@@ -310,6 +310,8 @@ static void spike_enter_state(spike_state_t new_state)
         spike_draw_progress_bar(spike.defuse_progress, 1);
         Show_Str(BAR_X, 120, 400, 24, (uint8_t *)"\xB1\xAC\xC4\xDC\xC6\xF7\xD2\xD1\xB2\xBF\xCA\xF0", 24, 0);
         Show_Str(BAR_X, 150, 400, 24, (uint8_t *)"SPIKE PLANTED", 24, 0);
+        Show_Str(BAR_X, 180, 400, 24, (uint8_t *)"\xB0\xB4\x4B\x45\x59\x31\xB2\xF0\xB3\xFD", 24, 0);
+        Show_Str(BAR_X, 210, 400, 24, (uint8_t *)"PRESS KEY1 TO DEFUSE", 24, 0);
         break;
 
     case STATE_DEFUSING:
@@ -323,6 +325,8 @@ static void spike_enter_state(spike_state_t new_state)
         spike_draw_progress_bar(spike.defuse_saved, 1);
         Show_Str(BAR_X, 120, 400, 24, (uint8_t *)"\xD5\xFD\xD4\xDA\xB2\xF0\xB3\xFD", 24, 0);
         Show_Str(BAR_X, 150, 400, 24, (uint8_t *)"DEFUSING", 24, 0);
+        Show_Str(BAR_X, 180, 400, 24, (uint8_t *)"\xB0\xB4\x4B\x45\x59\x31\xB2\xF0\xB3\xFD", 24, 0);
+        Show_Str(BAR_X, 210, 400, 24, (uint8_t *)"PRESS KEY1 TO DEFUSE", 24, 0);
         break;
 
     case STATE_DEFUSED:
@@ -335,13 +339,8 @@ static void spike_enter_state(spike_state_t new_state)
         spike.main_audio_done = 0;
         spike.egg_playing = 0;
         spike_audio_play_start("0:/SOUNDS/defused.mp3");
-        /* Diagnostic: blink green if eggs found, red if not */
-        if (spike.egg_count == 0) {
-            LED0 = 0; delay_ms(200); LED0 = 1; delay_ms(200);
-            LED0 = 0; delay_ms(200); LED0 = 1;
-        }
         LCD_Clear(COLOR_BG);
-        spike_update_display_time();
+        spike_update_display_time("+");
         Show_Str(BAR_X, 150, 400, 24, (uint8_t *)"\xB1\xAC\xC4\xDC\xC6\xF7\xD2\xD1\xB2\xF0\xB3\xFD", 24, 0);
         Show_Str(BAR_X, 180, 400, 24, (uint8_t *)"SPIKE DEFUSED", 24, 0);
         Show_Str(BAR_X, 210, 400, 24, (uint8_t *)"\xB0\xB4\x4B\x45\x59\x30\xC7\xD0\xBB\xBB\xB2\xCA\xB5\xB0", 24, 0);
@@ -355,7 +354,7 @@ static void spike_enter_state(spike_state_t new_state)
         spike_audio_play_start("0:/SOUNDS/boom.mp3");
         spike_egg_load_dir("0:/SOUNDS/Easter_eggs/detonated");
         LCD_Clear(COLOR_BG);
-        if (spike.was_defusing) spike_update_display_time();
+        if (spike.was_defusing) spike_update_display_time("-");
         Show_Str(BAR_X, 130, 400, 24, (uint8_t *)"\xB1\xAC\xC4\xDC\xC6\xF7\xD2\xD1\xC6\xF4\xB6\xAF", 24, 0);
         Show_Str(BAR_X, 160, 400, 24, (uint8_t *)"SPIKE DETONATED", 24, 0);
         Show_Str(BAR_X, 190, 400, 24, (uint8_t *)"\xB0\xB4\x4B\x45\x59\x30\xC7\xD0\xBB\xBB\xB2\xCA\xB5\xB0", 24, 0);
@@ -422,10 +421,10 @@ void spike_lcd_update(void)
         spike_draw_progress_bar(spike.defuse_progress, 1);
         break;
     case STATE_DEFUSED:
-        spike_update_display_time();
+        spike_update_display_time("+");
         break;
     case STATE_DETONATED:
-        if (spike.was_defusing) spike_update_display_time();
+        if (spike.was_defusing) spike_update_display_time("-");
         break;
     default:
         break;
@@ -449,12 +448,12 @@ static void spike_lcd_clear_area(uint16_t y, uint16_t h)
     LCD_Fill(0, y, 480, y + h, COLOR_BG);
 }
 
-static void spike_update_display_time(void)
+static void spike_update_display_time(const char *prefix)
 {
     char buf[32];
-    sprintf(buf, "%.2f", spike.display_time);
+    sprintf(buf, "%s %05.2f s", prefix, spike.display_time);
     spike_lcd_clear_area(BAR_X, 40);
-    Show_Str(BAR_X, 100, 200, 24, (uint8_t *)buf, 24, 0);
+    Show_Str(BAR_X, 100, 460, 24, (uint8_t *)buf, 24, 0);
 }
 
 /*──────────────────────────────────────────────────────────────
