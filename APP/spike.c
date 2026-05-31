@@ -39,6 +39,7 @@ static void spike_lcd_clear_area(uint16_t y, uint16_t h);
 static void spike_update_display_time(void);
 static uint32_t key_up_hold_ms(void);
 static uint32_t key1_hold_ms(void);
+static uint8_t key0_released(void);
 
 void spike_init(void)
 {
@@ -181,7 +182,7 @@ void spike_loop(void)
             spike_egg_play_random();
             spike.egg_playing = 1;
         }
-        if (key == KEY0_PRES && spike.egg_playing) {
+        if (key0_released() && spike.egg_playing) {
             spike_egg_next();
         }
         break;
@@ -192,7 +193,7 @@ void spike_loop(void)
             spike_egg_play_random();
             spike.egg_playing = 1;
         }
-        if (key == KEY0_PRES && spike.egg_playing) {
+        if (key0_released() && spike.egg_playing) {
             spike_egg_next();
         }
         break;
@@ -242,6 +243,18 @@ static uint32_t key1_hold_ms(void)
         press_start = 0;
         return 0;
     }
+}
+
+/* KEY0 release detection: returns 1 on rising edge (release) */
+static uint8_t key0_released(void)
+{
+    static uint8_t was_pressed = 0;
+    uint8_t pressed = (KEY0 == 0);  /* active low: 0=pressed, 1=released */
+    uint8_t result = 0;
+
+    if (!pressed && was_pressed) result = 1;
+    was_pressed = pressed;
+    return result;
 }
 
 /*──────────────────────────────────────────────────────────────
