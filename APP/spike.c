@@ -34,7 +34,7 @@ static const led_phase_t led_phases[6] = {
 #define COLOR_BAR_FILL  BLUE
 
 static void spike_enter_state(spike_state_t new_state);
-static void spike_draw_progress_bar(float progress);
+static void spike_draw_progress_bar(float progress, uint8_t show_midline);
 static void spike_lcd_clear_area(uint16_t y, uint16_t h);
 static void spike_update_display_time(void);
 static uint32_t key_up_hold_ms(void);
@@ -226,8 +226,9 @@ static void spike_enter_state(spike_state_t new_state)
         spike.defuse_half_done = 0;
         spike_audio_play_start("0:/SOUNDS/planting.mp3");
         LCD_Clear(COLOR_BG);
-        Show_Str(BAR_X, 100, 400, 24, (uint8_t *)"\xD5\xFD\xD4\xDA\xB2\xBF\xCA\xF0", 24, 0);
-        Show_Str(BAR_X, 130, 400, 24, (uint8_t *)"SPIKE PLANTING", 24, 0);
+        spike_draw_progress_bar(0.0f, 0);
+        Show_Str(BAR_X, 120, 400, 24, (uint8_t *)"\xD5\xFD\xD4\xDA\xB2\xBF\xCA\xF0", 24, 0);
+        Show_Str(BAR_X, 150, 400, 24, (uint8_t *)"SPIKE PLANTING", 24, 0);
         break;
 
     case STATE_DEPLOYED:
@@ -243,7 +244,7 @@ static void spike_enter_state(spike_state_t new_state)
         }
         LED0 = 1; LED1 = 1;
         LCD_Clear(COLOR_BG);
-        spike_draw_progress_bar(spike.defuse_progress);
+        spike_draw_progress_bar(spike.defuse_progress, 1);
         Show_Str(BAR_X, 120, 400, 24, (uint8_t *)"\xB1\xAC\xC4\xDC\xC6\xF7\xD2\xD1\xB2\xBF\xCA\xF0", 24, 0);
         Show_Str(BAR_X, 150, 400, 24, (uint8_t *)"SPIKE PLANTED", 24, 0);
         break;
@@ -251,13 +252,12 @@ static void spike_enter_state(spike_state_t new_state)
     case STATE_DEFUSING:
         spike.defuse_press_ms = HAL_GetTick();
         LED1 = 0;
-        /* Play real MP3: pause planted, play defuse_start, auto-resume */
         if (spike.defuse_half_done)
             spike_audio_pause_and_play("0:/SOUNDS/defuse_start_2.mp3");
         else
             spike_audio_pause_and_play("0:/SOUNDS/defuse_start_1.mp3");
         LCD_Clear(COLOR_BG);
-        spike_draw_progress_bar(spike.defuse_saved);
+        spike_draw_progress_bar(spike.defuse_saved, 1);
         Show_Str(BAR_X, 120, 400, 24, (uint8_t *)"\xD5\xFD\xD4\xDA\xB2\xF0\xB3\xFD", 24, 0);
         Show_Str(BAR_X, 150, 400, 24, (uint8_t *)"DEFUSING", 24, 0);
         break;
@@ -338,11 +338,18 @@ void spike_led_update(void)
 void spike_lcd_update(void)
 {
     switch (spike.state) {
+    case STATE_DEPLOYING: {
+        uint32_t h = key_up_hold_ms();
+        float p = (float)h / 4000.0f;
+        if (p > 1.0f) p = 1.0f;
+        spike_draw_progress_bar(p, 0);
+        break;
+    }
     case STATE_DEPLOYED:
-        spike_draw_progress_bar(0.0f);
+        spike_draw_progress_bar(0.0f, 1);
         break;
     case STATE_DEFUSING:
-        spike_draw_progress_bar(spike.defuse_progress);
+        spike_draw_progress_bar(spike.defuse_progress, 1);
         break;
     case STATE_DEFUSED:
         spike_update_display_time();
@@ -355,7 +362,7 @@ void spike_lcd_update(void)
     }
 }
 
-static void spike_draw_progress_bar(float progress)
+static void spike_draw_progress_bar(float progress, uint8_t show_midline)
 {
     uint16_t fill_w;
     LCD_DrawRectangle(BAR_X - 1, BAR_Y - 1, BAR_X + BAR_W + 1, BAR_Y + BAR_H + 1);
@@ -363,7 +370,8 @@ static void spike_draw_progress_bar(float progress)
     fill_w = (uint16_t)(progress * (float)BAR_W);
     if (fill_w > 0)
         LCD_Fill(BAR_X, BAR_Y + 2, BAR_X + fill_w, BAR_Y + BAR_H - 2, COLOR_BAR_FILL);
-    LCD_DrawLine(BAR_MID, BAR_Y + 2, BAR_MID, BAR_Y + BAR_H - 2);
+    if (show_midline)
+        LCD_DrawLine(BAR_MID, BAR_Y + 2, BAR_MID, BAR_Y + BAR_H - 2);
 }
 
 static void spike_lcd_clear_area(uint16_t y, uint16_t h)
