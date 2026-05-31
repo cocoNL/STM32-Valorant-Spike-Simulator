@@ -15,8 +15,6 @@
 #include "spike.h"
 #include "spike_audio.h"
 
-FATFS fs[2];
-
 int main(void)
 {
     HAL_Init();
@@ -31,20 +29,20 @@ int main(void)
     my_mem_init(SRAMIN);
     exfuns_init();
 
-    f_mount(&fs[0], "0:", 1);
-    f_mount(&fs[1], "1:", 1);
+    f_mount(fs[0], "0:", 1);
+    f_mount(fs[1], "1:", 1);
 
     POINT_COLOR = RED;
 
     while (font_init())
     {
-        LCD_ShowString(30, 50, 200, 16, 16, (uint8_t *)"Font Error!", 16);
+        LCD_ShowString(30, 50, 200, 16, 16, (uint8_t *)"Font Error!");
         delay_ms(200);
         LCD_Fill(30, 50, 240, 66, WHITE);
     }
 
     Show_Str(30, 50, 400, 24, (uint8_t *)"Valorant Spike", 24, 0);
-    Show_Str(30, 90, 400, 24, (uint8_t *)"按住KEY_UP部署爆能器", 24, 0);
+    Show_Str(30, 90, 400, 24, (uint8_t *)"\xB0\xB4\xD7\xA1KEY_UP\xB2\xBF\xCA\xF0\xB1\xAC\xC4\xDC\xC6\xF7", 24, 0);
     delay_ms(1500);
 
     spike_init();
