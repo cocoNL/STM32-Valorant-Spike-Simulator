@@ -14,8 +14,6 @@
 #include "vs10xx.h"
 #include "spike.h"
 #include "spike_audio.h"
-#include "pwmdac.h"
-#include "pcm_data.h"
 
 static uint16_t g_y;
 
@@ -79,17 +77,6 @@ int main(void)
     init_show("Audio: checking...");
     spike_audio_init();
     init_result("Audio: OK");
-
-    /* Onboard speaker */
-    init_show("Spk: beep...");
-    pcm_play_start(pcm_defuse_start_1, pcm_defuse_start_1_len);
-    delay_ms(1000);
-    init_result("Spk: OK");
-
-    /* PHONE */
-    init_show("Phone: tone...");
-    VS_Sine_Test();
-    init_result("Phone: OK");
 
     /* Eggs */
     init_show("Eggs: checking...");

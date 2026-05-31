@@ -65,6 +65,14 @@ void spike_audio_play_start(const char *path)
         return;
     }
 
+    /* Wait for VS1053 DREQ ready before reset (timeout 500ms) */
+    {
+        uint32_t t = HAL_GetTick();
+        while (VS_DQ == 0) {
+            if (HAL_GetTick() - t > 500) break;
+        }
+    }
+
     VS_Restart_Play();
     VS_Set_All();
     VS_SPK_Set(0);  /* long audio → speaker OFF */
