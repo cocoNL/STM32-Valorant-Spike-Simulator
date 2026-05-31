@@ -28,8 +28,12 @@ void spike_audio_init(void)
     pcm_player.len = 0;
     pcm_player.pos = 0;
 
-    TIM1_CH1_PWM_Init(255, 1);  /* 281.25kHz PWM on PA8 */
-    TIM_SetTIM1Compare1(0);      /* silence initially */
+    /* Initialize VS1053: hardware reset then software reset */
+    VS_HD_Reset();
+    VS_Soft_Reset();
+
+    TIM1_CH1_PWM_Init(255, 1);
+    TIM_SetTIM1Compare1(0);
     pcm_timer_init();
 }
 
@@ -62,6 +66,8 @@ void spike_audio_play_start(const char *path)
 
     VS_Restart_Play();
     VS_Set_All();
+    VS_SPK_Set(1);  /* ensure speaker ON after reset */
+    vs_linein_monitor_enable();
     VS_Reset_DecodeTime();
     VS_SPI_SpeedHigh();
 
@@ -116,12 +122,14 @@ void spike_audio_feed(void)
         }
     }
 
-    /* Send up to 32 bytes */
+    /* Send up to 32 bytes, break if VS1053 not ready */
     i = 0;
     while (i < 32 && audio_player.buf_pos < audio_player.buf_len) {
         if (VS_Send_MusicData(audio_player.buf + audio_player.buf_pos) == 0) {
             audio_player.buf_pos += 32;
             i += 32;
+        } else {
+            break;
         }
     }
 }
@@ -172,7 +180,7 @@ void pcm_timer_init(void)
     TIM2_Handler.Instance = TIM2;
     TIM2_Handler.Init.Prescaler = 8;        /* 72MHz / 9 = 8MHz */
     TIM2_Handler.Init.CounterMode = TIM_COUNTERMODE_UP;
-    TIM2_Handler.Init.Period = 725;         /* 8MHz / 726 ¡Ö 11019Hz */
+    TIM2_Handler.Init.Period = 725;         /* 8MHz / 726 ï¿½ï¿½ 11019Hz */
     TIM2_Handler.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
     TIM2_Handler.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
     HAL_TIM_Base_Init(&TIM2_Handler);
