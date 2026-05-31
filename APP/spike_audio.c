@@ -90,7 +90,6 @@ void spike_audio_stop(void)
 void spike_audio_feed(void)
 {
     UINT br;
-    uint16_t i;
 
     if (!audio_player.playing) return;
 
@@ -122,12 +121,10 @@ void spike_audio_feed(void)
         }
     }
 
-    /* Send up to 32 bytes, break if VS1053 not ready */
-    i = 0;
-    while (i < 32 && audio_player.buf_pos < audio_player.buf_len) {
+    /* Send all available data, 32 bytes at a time */
+    while (audio_player.buf_pos < audio_player.buf_len) {
         if (VS_Send_MusicData(audio_player.buf + audio_player.buf_pos) == 0) {
             audio_player.buf_pos += 32;
-            i += 32;
         } else {
             break;
         }

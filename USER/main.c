@@ -107,6 +107,5 @@ int main(void)
     while (1)
     {
         spike_loop();
-        delay_ms(1);
     }
 }

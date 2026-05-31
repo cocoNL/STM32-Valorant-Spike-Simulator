@@ -44,6 +44,9 @@ void spike_init(void)
     memset(&spike, 0, sizeof(spike_t));
     spike.state = STATE_UNDEPLOYED;
     LED0 = 1; LED1 = 1;
+    LCD_Clear(COLOR_BG);
+    Show_Str(BAR_X, 100, 400, 24, (uint8_t *)"\xB0\xB4KEY_UP\xB2\xBF\xCA\xF0\xB1\xAC\xC4\xDC\xC6\xF7", 24, 0);
+    Show_Str(BAR_X, 130, 400, 24, (uint8_t *)"PRESS KEY_UP TO PLANT", 24, 0);
 }
 
 void spike_loop(void)
@@ -209,6 +212,8 @@ static void spike_enter_state(spike_state_t new_state)
         LED0 = 1; LED1 = 1;
         pcm_stop();
         LCD_Clear(COLOR_BG);
+        Show_Str(BAR_X, 100, 400, 24, (uint8_t *)"\xB0\xB4KEY_UP\xB2\xBF\xCA\xF0\xB1\xAC\xC4\xDC\xC6\xF7", 24, 0);
+        Show_Str(BAR_X, 130, 400, 24, (uint8_t *)"PRESS KEY_UP TO PLANT", 24, 0);
         spike.deploy_press_ms = 0;
         spike.defuse_press_ms = 0;
         spike.defuse_progress = 0.0f;
