@@ -38,6 +38,7 @@ static void spike_draw_progress_bar(float progress, uint8_t show_midline);
 static void spike_lcd_clear_area(uint16_t y, uint16_t h);
 static void spike_update_display_time(void);
 static uint32_t key_up_hold_ms(void);
+static uint32_t key1_hold_ms(void);
 
 void spike_init(void)
 {
@@ -59,6 +60,10 @@ void spike_loop(void)
 
     key = KEY_Scan(1);
     hold = key_up_hold_ms();
+    {
+        uint32_t hold1 = key1_hold_ms();
+        if (spike.state == STATE_DEFUSING) hold = hold1;
+    }
 
     spike_led_update();
 
@@ -84,7 +89,7 @@ void spike_loop(void)
     case STATE_DEPLOYED:
         spike.countdown_elapsed = HAL_GetTick() - spike.countdown_start_ms;
 
-        if (key == WKUP_PRES) {
+        if (key == KEY1_PRES) {
             spike_enter_state(STATE_DEFUSING);
             break;
         }
@@ -182,6 +187,26 @@ static uint32_t key_up_hold_ms(void)
     uint32_t now = HAL_GetTick();
 
     if (WK_UP == 1) {
+        if (!held) {
+            press_start = now;
+            held = 1;
+        }
+        return now - press_start;
+    } else {
+        held = 0;
+        press_start = 0;
+        return 0;
+    }
+}
+
+/* KEY1 (PE3) hold time — active low */
+static uint32_t key1_hold_ms(void)
+{
+    static uint32_t press_start = 0;
+    static uint8_t  held = 0;
+    uint32_t now = HAL_GetTick();
+
+    if (KEY1 == 0) {  /* active low */
         if (!held) {
             press_start = now;
             held = 1;
