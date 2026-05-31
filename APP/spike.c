@@ -53,20 +53,13 @@ void spike_loop(void)
 {
     uint8_t key;
     uint32_t hold;
-    static uint32_t hb_tick = 0;
 
     spike_audio_feed();
 
-    key = KEY_Scan(1);  /* mode 1: continuous press support */
+    key = KEY_Scan(1);
     hold = key_up_hold_ms();
 
     spike_led_update();
-
-    /* HEARTBEAT: after state machine, override LED to show loop alive */
-    if (HAL_GetTick() - hb_tick > 500) {
-        hb_tick = HAL_GetTick();
-        LED0 = !LED0;
-    }
 
     switch (spike.state) {
 
@@ -214,6 +207,7 @@ static void spike_enter_state(spike_state_t new_state)
         LCD_Clear(COLOR_BG);
         Show_Str(BAR_X, 100, 400, 24, (uint8_t *)"\xB0\xB4KEY_UP\xB2\xBF\xCA\xF0\xB1\xAC\xC4\xDC\xC6\xF7", 24, 0);
         Show_Str(BAR_X, 130, 400, 24, (uint8_t *)"PRESS KEY_UP TO PLANT", 24, 0);
+        spike.countdown_start_ms = 0;
         spike.deploy_press_ms = 0;
         spike.defuse_press_ms = 0;
         spike.defuse_progress = 0.0f;
@@ -236,19 +230,19 @@ static void spike_enter_state(spike_state_t new_state)
         break;
 
     case STATE_DEPLOYED:
-        spike.countdown_start_ms = HAL_GetTick();
-        spike.countdown_elapsed = 0;
-        spike.led_phase_idx = 0;
-        spike.led_phase_elapsed = 0;
-        spike.led_last_toggle = HAL_GetTick();
-        spike.led_on = 0;
-        spike.defuse_half_done = 0;
-        spike.defuse_saved = 0.0f;
-        spike.defuse_progress = 0.0f;
+        /* Only reset countdown on fresh deploy, not when returning from defuse */
+        if (spike.countdown_start_ms == 0) {
+            spike.countdown_start_ms = HAL_GetTick();
+            spike.countdown_elapsed = 0;
+            spike.led_phase_idx = 0;
+            spike.led_phase_elapsed = 0;
+            spike.led_last_toggle = HAL_GetTick();
+            spike.led_on = 0;
+            spike_audio_play_start("0:/SOUNDS/planted.mp3");
+        }
         LED0 = 1; LED1 = 1;
-        spike_audio_play_start("0:/SOUNDS/planted.mp3");
         LCD_Clear(COLOR_BG);
-        spike_draw_progress_bar(0.0f);
+        spike_draw_progress_bar(spike.defuse_progress);
         Show_Str(BAR_X, 120, 400, 24, (uint8_t *)"\xB1\xAC\xC4\xDC\xC6\xF7\xD2\xD1\xB2\xBF\xCA\xF0", 24, 0);
         Show_Str(BAR_X, 150, 400, 24, (uint8_t *)"SPIKE PLANTED", 24, 0);
         break;
