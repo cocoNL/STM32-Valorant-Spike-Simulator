@@ -172,7 +172,7 @@ void pcm_timer_init(void)
     TIM2_Handler.Instance = TIM2;
     TIM2_Handler.Init.Prescaler = 8;        /* 72MHz / 9 = 8MHz */
     TIM2_Handler.Init.CounterMode = TIM_COUNTERMODE_UP;
-    TIM2_Handler.Init.Period = 725;         /* 8MHz / 726 â‰ˆ 11019Hz */
+    TIM2_Handler.Init.Period = 725;         /* 8MHz / 726 ¡Ö 11019Hz */
     TIM2_Handler.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
     TIM2_Handler.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
     HAL_TIM_Base_Init(&TIM2_Handler);

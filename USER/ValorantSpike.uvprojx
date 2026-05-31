@@ -615,11 +615,6 @@
               <FilePath>..\FATFS\exfuns\exfuns.c</FilePath>
             </File>
             <File>
-              <FileName>fattester.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\FATFS\exfuns\fattester.c</FilePath>
-            </File>
-            <File>
               <FileName>mycc936.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\FATFS\exfuns\mycc936.c</FilePath>
