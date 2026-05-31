@@ -14,6 +14,26 @@
 #include "vs10xx.h"
 #include "spike.h"
 #include "spike_audio.h"
+#include "pwmdac.h"
+#include "pcm_data.h"
+
+static uint16_t g_y;
+
+/* Print a line and move down */
+static void init_show(const char *msg)
+{
+    Show_Str(10, g_y, 460, 24, (uint8_t *)msg, 24, 0);
+    g_y += 30;
+}
+
+/* Overwrite current line (used to show result after check) */
+static void init_result(const char *msg)
+{
+    g_y -= 30;
+    LCD_Fill(10, g_y, 470, g_y + 28, WHITE);
+    Show_Str(10, g_y, 460, 24, (uint8_t *)msg, 24, 0);
+    g_y += 30;
+}
 
 int main(void)
 {
@@ -29,27 +49,60 @@ int main(void)
     my_mem_init(SRAMIN);
     exfuns_init();
 
-    f_mount(fs[0], "0:", 1);
-    f_mount(fs[1], "1:", 1);
+    POINT_COLOR = BLACK;
+    LCD_Clear(WHITE);
+    g_y = 10;
 
-    POINT_COLOR = RED;
+    init_show("Sys Init OK");
 
-    while (font_init())
-    {
-        LCD_ShowString(30, 50, 200, 16, 16, (uint8_t *)"Font Error!");
-        delay_ms(200);
-        LCD_Fill(30, 50, 240, 66, WHITE);
+    /* SD card */
+    init_show("SD: checking...");
+    if (f_mount(fs[0], "0:", 1) == FR_OK)
+        init_result("SD: OK");
+    else {
+        init_result("SD: FAIL!");
+        while(1);
     }
 
-    Show_Str(30, 50, 400, 24, (uint8_t *)"Valorant Spike", 24, 0);
-    Show_Str(30, 90, 400, 24, (uint8_t *)"\xB0\xB4\xD7\xA1KEY_UP\xB2\xBF\xCA\xF0\xB1\xAC\xC4\xDC\xC6\xF7", 24, 0);
-    delay_ms(1500);
+    f_mount(fs[1], "1:", 1);
+
+    /* Font */
+    init_show("Font: checking...");
+    if (font_init() == 0)
+        init_result("Font: OK");
+    else {
+        init_result("Font: FAIL!");
+        while(1);
+    }
+
+    /* Audio */
+    init_show("Audio: checking...");
+    spike_audio_init();
+    VS_SPK_Set(1);
+    init_result("Audio: OK");
+
+    /* Onboard speaker */
+    init_show("Spk: beep...");
+    pcm_play_start(pcm_defuse_start_1, pcm_defuse_start_1_len);
+    delay_ms(1000);
+    init_result("Spk: OK");
+
+    /* PHONE */
+    init_show("Phone: tone...");
+    VS_Sine_Test();
+    init_result("Phone: OK");
+
+    /* Eggs */
+    init_show("Eggs: checking...");
+    spike_egg_load_dir("0:/SOUNDS/Easter_eggs/defused");
+    init_result("Eggs: OK");
+
+    /* Done */
+    init_show("All OK! Starting...");
+    delay_ms(2000);
+    LCD_Clear(WHITE);
 
     spike_init();
-
-    spike_egg_load_dir("0:/SOUNDS/Easter_eggs/defused");
-
-    LCD_Clear(WHITE);
 
     while (1)
     {
