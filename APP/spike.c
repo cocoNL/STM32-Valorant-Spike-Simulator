@@ -315,11 +315,18 @@ static void spike_enter_state(spike_state_t new_state)
     case STATE_DEFUSED:
         LED0 = 1; LED1 = 0;
         pcm_stop();
+        /* Reload defused eggs (may have been overwritten by detonated dir) */
+        spike_egg_load_dir("0:/SOUNDS/Easter_eggs/defused");
         spike.display_time = 45.0f - (float)(HAL_GetTick() - spike.countdown_start_ms) / 1000.0f;
         if (spike.display_time < 0.0f) spike.display_time = 0.0f;
         spike.main_audio_done = 0;
         spike.egg_playing = 0;
         spike_audio_play_start("0:/SOUNDS/defused.mp3");
+        /* Diagnostic: blink green if eggs found, red if not */
+        if (spike.egg_count == 0) {
+            LED0 = 0; delay_ms(200); LED0 = 1; delay_ms(200);
+            LED0 = 0; delay_ms(200); LED0 = 1;
+        }
         LCD_Clear(COLOR_BG);
         spike_update_display_time();
         Show_Str(BAR_X, 150, 400, 24, (uint8_t *)"\xB1\xAC\xC4\xDC\xC6\xF7\xD2\xD1\xB2\xF0\xB3\xFD", 24, 0);
