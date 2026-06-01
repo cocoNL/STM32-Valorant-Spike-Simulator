@@ -23,9 +23,6 @@ typedef struct {
 typedef struct {
     spike_state_t state;
 
-    /* deploy timing */
-    uint32_t deploy_press_ms;   /* tick when deploy press started (0=not pressing) */
-
     /* countdown timing */
     uint32_t countdown_start_ms; /* tick when countdown started */
     uint32_t countdown_elapsed;  /* elapsed ms in deployed state */
@@ -39,12 +36,11 @@ typedef struct {
     /* LED blinking */
     uint8_t  led_phase_idx;      /* current phase index 0-5 */
     uint32_t led_phase_elapsed;  /* elapsed ms within current phase */
-    uint32_t led_last_toggle;    /* last LED toggle tick */
-    uint8_t  led_on;             /* 1=LED currently on */
 
     /* audio track management */
     uint8_t  main_audio_done;    /* main audio (defused/boom) finished */
     uint8_t  egg_playing;        /* easter egg currently playing */
+    uint8_t  egg_text_switched;   /* 1=bottom text already showing switch hint */
 
     /* easter egg */
     uint8_t  egg_count;          /* number of files in current egg dir */
