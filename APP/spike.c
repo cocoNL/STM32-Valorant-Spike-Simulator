@@ -59,6 +59,12 @@ void spike_loop(void)
     spike_audio_feed();
     spike_audio_resume_if_needed(spike.countdown_elapsed);
 
+    /* Deferred audio stop for early deploy release */
+    if (spike.deploy_stop_ms > 0 && HAL_GetTick() >= spike.deploy_stop_ms) {
+        spike_audio_stop();
+        spike.deploy_stop_ms = 0;
+    }
+
     key = KEY_Scan(1);
     hold = key_up_hold_ms();
     {
@@ -76,16 +82,28 @@ void spike_loop(void)
         }
         break;
 
-    case STATE_DEPLOYING:
-        if (hold == 0) {
-            /* Released before 4s */
-            spike_audio_stop();
-            spike_enter_state(STATE_UNDEPLOYED);
-        } else if (hold >= 4000) {
+    case STATE_DEPLOYING: {
+        static uint32_t last_hold_val = 0;
+        if (hold > 0) last_hold_val = hold;
+        if (hold >= 4000) {
             spike_audio_stop();
             spike_enter_state(STATE_DEPLOYED);
+            last_hold_val = 0;
+        } else if (hold == 0) {
+            if (last_hold_val < 1000) {
+                /* Held <1s: switch screen now, defer audio stop */
+                spike.deploy_stop_ms = HAL_GetTick() + (1000 - last_hold_val);
+                last_hold_val = 0;
+                spike_enter_state(STATE_UNDEPLOYED);
+            } else {
+                /* Held >=1s: stop immediately */
+                spike_audio_stop();
+                spike_enter_state(STATE_UNDEPLOYED);
+                last_hold_val = 0;
+            }
         }
         break;
+    }
 
     case STATE_DEPLOYED:
         spike.countdown_elapsed = HAL_GetTick() - spike.countdown_start_ms;
@@ -293,6 +311,7 @@ static void spike_enter_state(spike_state_t new_state)
         break;
 
     case STATE_DEPLOYING:
+        spike.deploy_stop_ms = 0;
         spike.defuse_progress = 0.0f;
         spike.defuse_saved = 0.0f;
         spike.defuse_half_done = 0;
