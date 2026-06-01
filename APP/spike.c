@@ -31,7 +31,7 @@ static const led_phase_t led_phases[6] = {
 #define BAR_MID   (BAR_X + BAR_W / 2)
 
 #define COLOR_BG        WHITE
-#define COLOR_BAR_FILL  BLUE
+#define COLOR_BAR_FILL  RED
 
 static void spike_enter_state(spike_state_t new_state);
 static void spike_draw_progress_bar(float progress, uint8_t show_midline);
@@ -176,27 +176,37 @@ void spike_loop(void)
         break;
     }
 
-    case STATE_DEFUSED:
-        if (!spike_audio_is_busy() && !spike.egg_playing) {
+    case STATE_DEFUSED: {
+        uint8_t k0 = key0_released();
+        if (!spike_audio_is_busy() && !spike.main_audio_done) {
             spike.main_audio_done = 1;
-            spike_egg_play_random();
-            spike.egg_playing = 1;
         }
-        if (key0_released() && spike.egg_playing) {
-            spike_egg_next();
+        if (k0 && spike.main_audio_done) {
+            if (!spike.egg_playing) {
+                spike_egg_play_random();
+                spike.egg_playing = 1;
+            } else {
+                spike_egg_next();
+            }
         }
         break;
+    }
 
-    case STATE_DETONATED:
-        if (!spike_audio_is_busy() && !spike.egg_playing && spike.main_audio_done == 0) {
+    case STATE_DETONATED: {
+        uint8_t k0 = key0_released();
+        if (!spike_audio_is_busy() && !spike.main_audio_done) {
             spike.main_audio_done = 1;
-            spike_egg_play_random();
-            spike.egg_playing = 1;
         }
-        if (key0_released() && spike.egg_playing) {
-            spike_egg_next();
+        if (k0 && spike.main_audio_done) {
+            if (!spike.egg_playing) {
+                spike_egg_play_random();
+                spike.egg_playing = 1;
+            } else {
+                spike_egg_next();
+            }
         }
         break;
+    }
     }
 
     spike_lcd_update();
@@ -272,18 +282,17 @@ static void spike_enter_state(spike_state_t new_state)
         Show_Str(BAR_X, 100, 400, 24, (uint8_t *)"\xB0\xB4KEY_UP\xB2\xBF\xCA\xF0\xB1\xAC\xC4\xDC\xC6\xF7", 24, 0);
         Show_Str(BAR_X, 130, 400, 24, (uint8_t *)"PRESS KEY_UP TO PLANT", 24, 0);
         spike.countdown_start_ms = 0;
-        spike.deploy_press_ms = 0;
         spike.defuse_press_ms = 0;
         spike.defuse_progress = 0.0f;
         spike.defuse_saved = 0.0f;
         spike.defuse_half_done = 0;
         spike.main_audio_done = 0;
         spike.egg_playing = 0;
+        spike.egg_text_switched = 0;
         spike.was_defusing = 0;
         break;
 
     case STATE_DEPLOYING:
-        spike.deploy_press_ms = HAL_GetTick();
         spike.defuse_progress = 0.0f;
         spike.defuse_saved = 0.0f;
         spike.defuse_half_done = 0;
@@ -301,8 +310,6 @@ static void spike_enter_state(spike_state_t new_state)
             spike.countdown_elapsed = 0;
             spike.led_phase_idx = 0;
             spike.led_phase_elapsed = 0;
-            spike.led_last_toggle = HAL_GetTick();
-            spike.led_on = 0;
             spike_audio_play_start("0:/SOUNDS/planted.mp3");
         }
         LED0 = 1; LED1 = 1;
@@ -338,12 +345,13 @@ static void spike_enter_state(spike_state_t new_state)
         if (spike.display_time < 0.0f) spike.display_time = 0.0f;
         spike.main_audio_done = 0;
         spike.egg_playing = 0;
+        spike.egg_text_switched = 0;
         spike_audio_play_start("0:/SOUNDS/defused.mp3");
         LCD_Clear(COLOR_BG);
         spike_update_display_time("+");
         Show_Str(BAR_X, 150, 400, 24, (uint8_t *)"\xB1\xAC\xC4\xDC\xC6\xF7\xD2\xD1\xB2\xF0\xB3\xFD", 24, 0);
         Show_Str(BAR_X, 180, 400, 24, (uint8_t *)"SPIKE DEFUSED", 24, 0);
-        Show_Str(BAR_X, 210, 400, 24, (uint8_t *)"\xB0\xB4\x4B\x45\x59\x30\xC7\xD0\xBB\xBB\xB2\xCA\xB5\xB0", 24, 0);
+        Show_Str(BAR_X, 210, 400, 24, (uint8_t *)"\xB0\xB4\x4B\x45\x59\x30\xB2\xA5\xB7\xC5\xB2\xCA\xB5\xB0", 24, 0);
         break;
 
     case STATE_DETONATED:
@@ -351,13 +359,14 @@ static void spike_enter_state(spike_state_t new_state)
         pcm_stop();
         spike.main_audio_done = 0;
         spike.egg_playing = 0;
+        spike.egg_text_switched = 0;
         spike_audio_play_start("0:/SOUNDS/boom.mp3");
         spike_egg_load_dir("0:/SOUNDS/Easter_eggs/detonated");
         LCD_Clear(COLOR_BG);
         if (spike.was_defusing) spike_update_display_time("-");
         Show_Str(BAR_X, 130, 400, 24, (uint8_t *)"\xB1\xAC\xC4\xDC\xC6\xF7\xD2\xD1\xC6\xF4\xB6\xAF", 24, 0);
         Show_Str(BAR_X, 160, 400, 24, (uint8_t *)"SPIKE DETONATED", 24, 0);
-        Show_Str(BAR_X, 190, 400, 24, (uint8_t *)"\xB0\xB4\x4B\x45\x59\x30\xC7\xD0\xBB\xBB\xB2\xCA\xB5\xB0", 24, 0);
+        Show_Str(BAR_X, 190, 400, 24, (uint8_t *)"\xB0\xB4\x4B\x45\x59\x30\xB2\xA5\xB7\xC5\xB2\xCA\xB5\xB0", 24, 0);
         break;
     }
 }
@@ -422,9 +431,19 @@ void spike_lcd_update(void)
         break;
     case STATE_DEFUSED:
         spike_update_display_time("+");
+        if (spike.egg_playing && !spike.egg_text_switched) {
+            LCD_Fill(BAR_X, 210, BAR_X + 400, 238, COLOR_BG);
+            Show_Str(BAR_X, 210, 400, 24, (uint8_t *)"\xB0\xB4\x4B\x45\x59\x30\xC7\xD0\xBB\xBB\xB2\xCA\xB5\xB0", 24, 0);
+            spike.egg_text_switched = 1;
+        }
         break;
     case STATE_DETONATED:
         if (spike.was_defusing) spike_update_display_time("-");
+        if (spike.egg_playing && !spike.egg_text_switched) {
+            LCD_Fill(BAR_X, 190, BAR_X + 400, 218, COLOR_BG);
+            Show_Str(BAR_X, 190, 400, 24, (uint8_t *)"\xB0\xB4\x4B\x45\x59\x30\xC7\xD0\xBB\xBB\xB2\xCA\xB5\xB0", 24, 0);
+            spike.egg_text_switched = 1;
+        }
         break;
     default:
         break;
@@ -433,7 +452,9 @@ void spike_lcd_update(void)
 
 static void spike_draw_progress_bar(float progress, uint8_t show_midline)
 {
-    uint16_t fill_w;
+    uint16_t fill_w, old_color;
+    old_color = POINT_COLOR;
+    POINT_COLOR = BLACK;
     LCD_DrawRectangle(BAR_X - 1, BAR_Y - 1, BAR_X + BAR_W + 1, BAR_Y + BAR_H + 1);
     LCD_Fill(BAR_X, BAR_Y, BAR_X + BAR_W, BAR_Y + BAR_H, COLOR_BG);
     fill_w = (uint16_t)(progress * (float)BAR_W);
@@ -441,6 +462,7 @@ static void spike_draw_progress_bar(float progress, uint8_t show_midline)
         LCD_Fill(BAR_X, BAR_Y + 2, BAR_X + fill_w, BAR_Y + BAR_H - 2, COLOR_BAR_FILL);
     if (show_midline)
         LCD_DrawLine(BAR_MID, BAR_Y + 2, BAR_MID, BAR_Y + BAR_H - 2);
+    POINT_COLOR = old_color;
 }
 
 static void spike_lcd_clear_area(uint16_t y, uint16_t h)

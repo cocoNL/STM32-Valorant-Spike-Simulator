@@ -1,49 +1,61 @@
 # Progress Log
 
-## Session: 2026-05-31
+## Session: 2026-05-31 ~ 2026-06-01
 
-### Phase 1: 需求分析与参考学习
+### Phase 1-2: 需求分析与工程搭建
 - **Status:** complete
-- **Started:** 2026-05-31
 - **Completed:** 2026-05-31
 
-- Actions taken:
-  - 完整阅读需求文档（嵌入式大作业.txt，95行）
-  - 通过搜索HAL例程代码确认按键和LED引脚映射
-  - 创建Python venv安装pandas+openpyxl读取IO引脚分配表xlsx
-  - 完整提取所有IO引脚信息（114行）
-  - 确认绿色LED为PE5（DS1），红色LED为PB5（DS0）
-  - 使用mutagen库获取所有13个MP3文件的时长和码率
-  - 通过PowerShell找到SD卡为G盘
-  - 将SOUNDS目录完整复制到SD卡根目录
-  - 将SYSTEM/FONT目录复制到SD卡（中文字库GBK12/16/24+UNIGBK.BIN）
-  - 与用户确认全部关键问题（按键、LED、字体、重置、音频方案）
-  - 精读音乐播放器参考例程（main.c, vs10xx.h, key.c, mp3player.c）
-  - 精读PWM DAC实验（实验21, main.c, readme）
-  - 分析V3原理图音频部分（P11/P10多功能端口）
-  - 确认P11 AIN-PDC短接方案
-  - 用户已用跳线帽短接AIN-PDC
-  - 确定最终音频方案：VS1053→PHONE(外接音箱) + PA8 PWM→P11→板载扬声器
-  - 更新task_plan.md为详细实施步骤（Phase 2-6全部展开）
-  - 更新findings.md为完整技术决策记录
+### Phase 3: 基础驱动适配
+- **Status:** complete
+- **Completed:** 2026-06-01
 
-- Files created/modified:
-  - `D:\STM32Projects\Valorant_Spike\task_plan.md` (created, 多次更新)
-  - `D:\STM32Projects\Valorant_Spike\findings.md` (created, 多次更新)
-  - `D:\STM32Projects\Valorant_Spike\progress.md` (created, 多次更新)
-  - `G:\SOUNDS\*` (复制自E盘SOUNDS目录)
-  - `G:\SYSTEM\FONT\*` (复制自V4 SD卡参考文件)
-  - `E:\课程内容\第四学期\嵌入式系统\大作业\embedded_venv\` (Python虚拟环境)
-
-### Phase 2: 项目工程搭建
+### Phase 4: 核心功能调试
 - **Status:** in_progress
-- **Started:** 2026-05-31
+- **Started:** 2026-06-01
 
-## 5-Question Reboot Check
-| Question | Answer |
-|----------|--------|
-| Where am I? | Phase 2 - 准备从音乐播放器例程复制项目并搭建Keil工程 |
-| Where am I going? | Phase 2→3→4→5→6 |
-| What's the goal? | 战舰V3上模拟Valorant Spike完整功能 |
-| What have I learned? | 见findings.md - 所有引脚、音频路径、P11跳线、PCM方案 |
-| What have I done? | 完整需求分析、硬件配置(P11短接)、SD卡文件部署、详细实施计划 |
+#### 已修复的Bug
+1. **VS1053 DREQ死等** — 添加VS_HD_Reset硬件复位
+2. **按键检测失效** — 改用KEY_Scan(1)+独立hold函数
+3. **初始化音频测试污染VS1053** — 去除VS_Sine_Test和PCM测试
+4. **快速按压无planting音效** — 去除stop中的VS_Soft_Reset, 加DREQ超时
+5. **板载扬声器泄露planted** — HT6872 GPIO4软件开关
+6. **进度条保留50%被LCD刷新覆盖** — spike_lcd_update修正
+7. **KEY1拆除反复跳动** — 添加key1_hold_ms独立追踪
+8. **彩蛋不播放(defused)** — resume_needed清零+重载egg目录
+9. **中文编码ARMCC不兼容** — GBK hex转义序列
+10. **音频卡顿** — 去除32byte/次限制, 倾力灌数据
+11. **倒计时被拆除退回重置** — countdown_start_ms非零检查
+12. **部署进度条** — 新增无中线进度条
+13. **拆除即时成功** — 100%时不等松手
+14. **KEY0松手切歌** — 改为释放检测
+15. **时间格式** — + 00.00 s / - 00.00 s
+
+- 项目参考音乐播放器例程的目录结构和驱动代码搭建
+- SD卡已部署SOUNDS和SYSTEM/FONT文件
+
+#### 已完成功能
+- 6状态完整流转
+- 部署4s+进度条
+- 拆除7s(3.5s半进度保留)
+- 红LED 6阶段加速闪烁
+- 绿LED状态指示
+- 45秒倒计时
+- VS1053 MP3播放（非阻塞）
+- 短音频暂停/时间同步恢复
+- 彩蛋随机+KEY0循环
+- LCD全状态显示（中英文+进度条+时间+按键提示）
+
+#### 当前音频方案
+- 全部MP3音频 → VS1053 → TDA1308T → PHONE口(外接耳机/音箱)
+- 短音频(defuse_start) → 短暂暂停planted → VS1053播放 → 时间同步恢复
+- 板载扬声器不参与音频播放(HT6872保持关闭)
+
+#### 按键分配
+- KEY_UP(PA0) — 部署
+- KEY1(PE3) — 拆除
+- KEY0(PE4) — 彩蛋切歌
+
+#### Git记录
+- 最新: b54df04 — Time display format + key hints
+- 仓库: https://github.com/cocoNL/STM32-Valorant-Spike-Simulator

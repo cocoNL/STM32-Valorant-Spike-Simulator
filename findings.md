@@ -79,26 +79,25 @@
 
 ### 音频路径（最终方案）
 ```
-[主音频 — PHONE口]
+[全部音频 — PHONE口]
 SD卡 MP3 → VS1053解码(SPI1) → TDA1308T → PHONE口 → 外接音箱/耳机
 
-[短音效 — 板载扬声器]
-PCM数组 → TIM2 ISR(11025Hz) → TIM1 CCR1(PA8 PWM) → 
-R77+C63 RC滤波 → P11(AIN-PDC短接) → HT6872功放 → 板载扬声器
+[短音效(defuse_start)]
+短暂暂停planted → VS1053播放defuse_start MP3 → 
+时间同步恢复planted（跳过暂停期间对应音频段）
 
-两路完全独立，同时播放互不干扰。
+板载扬声器不参与音频播放。
 ```
 
 ## Technical Decisions
 | Decision | Rationale |
 |----------|-----------|
-| PA8 PWM替代DAC | P11 AIN-PDC短接，走板载音频通路，零额外硬件 |
-| TIM1 PWM 281.25kHz, TIM2 ISR 11025Hz | 参考PWM DAC实验，RC滤波器截止频率159kHz有效滤除载波 |
+| 短音频MP3暂停插入+时间同步恢复 | VS1053单解码器限制，暂停<1s体验可接受，恢复时按倒计时比例跳转 |
 | GBK24字体(24px) | 用户指定大字体，480宽屏最宽文字192px轻松显示 |
 | 非阻塞tick驱动 | SysTick 1ms + TIM2 11025Hz，所有延时基于tick差 |
 | 彩蛋顺序衔接 | 用户明确选择方案A，主音效播完后再播彩蛋 |
-| 板载扬声器+外接音箱双输出 | 两个物理扬声器同时发声，无需混音硬件 |
 | 无软件重置 | 用户确认复位键即可 |
+| HT6872功放软件关闭 | 平时VS_SPK_Set(0)关板载扬声器，避免planted泄露 |
 
 ## Issues Encountered
 | Issue | Resolution |
