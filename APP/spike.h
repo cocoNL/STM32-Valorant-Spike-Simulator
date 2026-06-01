@@ -49,6 +49,9 @@ typedef struct {
     char     egg_files[20][64];  /* egg file names (max 20 files) */
     char     egg_current[128];   /* current full path */
 
+    /* deploying delayed stop */
+    uint32_t deploy_stop_ms;     /* tick when to stop audio after early release */
+
     /* time display */
     float    display_time;       /* time to show on LCD (remaining or needed) */
     uint8_t  was_defusing;       /* 1=was defusing when detonated */
