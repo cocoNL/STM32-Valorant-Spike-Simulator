@@ -42,11 +42,13 @@ static uint32_t key_up_hold_ms(void);
 static uint32_t key1_hold_ms(void);
 static uint8_t key0_released(void);
 static uint8_t pic_key2_released(void);
+static void spike_draw_state_pic(void);
 
 void spike_init(void)
 {
     memset(&spike, 0, sizeof(spike_t));
     spike.state = STATE_UNDEPLOYED;
+    spike.state_pic_idx = -1;
     LED0 = 1; LED1 = 1;
     LCD_Clear(COLOR_BG);
     Show_Str(BAR_X, 100, 400, 24, (uint8_t *)"\xB0\xB4KEY_UP\xB2\xBF\xCA\xF0\xB1\xAC\xC4\xDC\xC6\xF7", 24, 0);
@@ -62,7 +64,7 @@ void spike_loop(void)
     spike_audio_feed();
     spike_audio_resume_if_needed(spike.countdown_elapsed);
 
-    /* Deferred audio stop for early deploy release */
+    /* Deferred audio stop: play to 1.3s for early deploy release */
     if (spike.deploy_stop_ms > 0 && HAL_GetTick() >= spike.deploy_stop_ms) {
         spike_audio_stop();
         spike.deploy_stop_ms = 0;
@@ -114,8 +116,8 @@ void spike_loop(void)
             last_hold_val = 0;
         } else if (hold == 0) {
             if (last_hold_val < 1000) {
-                /* Held <1s: switch screen now, defer audio stop */
-                spike.deploy_stop_ms = HAL_GetTick() + (1000 - last_hold_val);
+                /* Held <1s: play to 1.3s then stop */
+                spike.deploy_stop_ms = HAL_GetTick() + (1300 - last_hold_val);
                 last_hold_val = 0;
                 spike_enter_state(STATE_UNDEPLOYED);
             } else {
@@ -315,6 +317,7 @@ static uint8_t key0_released(void)
 static void spike_enter_state(spike_state_t new_state)
 {
     spike.state = new_state;
+    spike.state_pic_idx = -1;  /* force state pic redraw */
 
     switch (new_state) {
     case STATE_UNDEPLOYED:
@@ -493,6 +496,8 @@ void spike_lcd_update(void)
     default:
         break;
     }
+
+    spike_draw_state_pic();
 }
 
 static void spike_draw_progress_bar(float progress, uint8_t show_midline)
@@ -573,6 +578,78 @@ void spike_egg_next(void)
     spike_audio_stop();
     while (spike_audio_is_busy()) spike_audio_feed();
     spike_audio_play_start(spike.egg_current);
+}
+
+/*──────────────────────────────────────────────────────────────
+ * State picture display
+ *──────────────────────────────────────────────────────────────*/
+/* Pre-loaded state picture data from SD card (stored in external SRAM) */
+static u16 *sram_pics[8];  /* pointers to pixel data in SRAM */
+static u16 sram_pic_w[8], sram_pic_h[8];  /* dimensions */
+
+/* Load all state pics from SD into external SRAM at init */
+void spike_state_pics_load(void)
+{
+    static const char *names[] = {
+        "not_planted","planting","planted","half_defused",
+        "defuse_1","defuse_2","defused","detonated"
+    };
+    char path[64];
+    FIL f;
+    UINT br;
+    u16 wh[2];
+    int i;
+
+    for (i = 0; i < 8; i++) {
+        sprintf(path, "0:/PICS/spike_pics/%s.bin", names[i]);
+        if (f_open(&f, path, FA_READ) != FR_OK) continue;
+
+        /* Read width and height */
+        f_read(&f, wh, 4, &br);
+        sram_pic_w[i] = wh[0];
+        sram_pic_h[i] = wh[1];
+
+        /* Allocate SRAM and read pixel data */
+        sram_pics[i] = (u16 *)mymalloc(SRAMEX, wh[0] * wh[1] * 2);
+        if (sram_pics[i])
+            f_read(&f, sram_pics[i], wh[0] * wh[1] * 2, &br);
+        f_close(&f);
+    }
+}
+
+static void spike_draw_state_pic(void)
+{
+    const u16 *pic = NULL;
+    uint16_t pic_w = 0, pic_h = 0;
+    uint16_t x, y;
+    int idx = -1, i;
+
+    if (spike.pic_mode) return;
+
+    switch (spike.state) {
+    case STATE_UNDEPLOYED: idx = 0; break;
+    case STATE_DEPLOYING:  idx = 1; break;
+    case STATE_DEPLOYED:   idx = spike.defuse_half_done ? 3 : 2; break;
+    case STATE_DEFUSING:   idx = (spike.defuse_progress >= 0.5f) ? 5 : 4; break;
+    case STATE_DEFUSED:    idx = 6; break;
+    case STATE_DETONATED:  idx = 7; break;
+    default: return;
+    }
+
+    if (idx == spike.state_pic_idx) return;
+    spike.state_pic_idx = idx;
+
+    pic = sram_pics[idx];
+    if (!pic) return;
+    pic_w = sram_pic_w[idx];
+    pic_h = sram_pic_h[idx];
+
+    i = 0;
+    for (y = 272 - pic_h + 450; y < 272 + 450; y++) {
+        for (x = (480 - pic_w) / 2; x < (480 + pic_w) / 2; x++) {
+            LCD_Fast_DrawPoint(x, y, pic[i++]);
+        }
+    }
 }
 
 /*──────────────────────────────────────────────────────────────
@@ -681,6 +758,7 @@ void spike_pic_enter(void)
 void spike_pic_exit(void)
 {
     spike.pic_mode = 0;
+    spike.state_pic_idx = -1;  /* force state pic redraw */
     /* Redraw state display without re-triggering audio/time reset */
     LCD_Clear(COLOR_BG);
     switch (spike.state) {
