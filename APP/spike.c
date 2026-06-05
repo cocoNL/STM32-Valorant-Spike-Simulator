@@ -616,20 +616,48 @@ void spike_pic_load_dir(void)
     }
     spike.pic_count = i;
     f_closedir(&picdir);
+
+    /* Sort alphabetically */
+    {
+        uint16_t a, b;
+        char tmp[64];
+        for (a = 0; a < spike.pic_count; a++) {
+            for (b = a + 1; b < spike.pic_count; b++) {
+                if (strcmp(spike.pic_files[a], spike.pic_files[b]) > 0) {
+                    strcpy(tmp, spike.pic_files[a]);
+                    strcpy(spike.pic_files[a], spike.pic_files[b]);
+                    strcpy(spike.pic_files[b], tmp);
+                }
+            }
+        }
+    }
 }
 
 void spike_pic_show(uint16_t index)
 {
     char path[128];
+    char name[64];
+    char *dot;
     if (spike.pic_count == 0) return;
     sprintf(path, "0:/PICS/%s", spike.pic_files[index]);
 
     LCD_Clear(BLACK);
-    /* Image fills screen, text overlays at bottom */
+    /* Image fills screen */
     ai_load_picfile((const u8 *)path, 0, 0, 480, 272, 1);
 
-    /* Three hint lines stacked at bottom, +28px from previous bottom */
-    LCD_Fill(0, 722, 480, 798, BLACK);
+    /* Extract filename without extension */
+    strcpy(name, spike.pic_files[index]);
+    dot = strrchr(name, '.');
+    if (dot) *dot = '\0';
+
+    /* Bottom overlay: counter + filename + three hint lines */
+    {
+        char cnt[16];
+        sprintf(cnt, "%d / %d", index + 1, spike.pic_count);
+        LCD_Fill(0, 674, 480, 798, BLACK);
+        Show_Str(0, 676, 480, 24, (uint8_t *)cnt, 24, 0);
+    }
+    Show_Str(0, 700, 480, 24, (uint8_t *)name, 24, 0);
     Show_Str(0, 724, 480, 24, (uint8_t *)"\x4B\x45\x59\x5F\x55\x50\xA3\xBA\xC9\xCF\xD2\xBB\xD5\xC5", 24, 0);
     Show_Str(0, 748, 480, 24, (uint8_t *)"\x4B\x45\x59\x31\xA3\xBA\xCF\xC2\xD2\xBB\xD5\xC5", 24, 0);
     Show_Str(0, 772, 480, 24, (uint8_t *)"\x4B\x45\x59\x32\xA3\xBA\xB9\xD8\xB1\xD5\xCD\xBC\xC6\xAC", 24, 0);
