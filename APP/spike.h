@@ -42,6 +42,12 @@ typedef struct {
     uint8_t  egg_playing;        /* easter egg currently playing */
     uint8_t  egg_text_switched;   /* 1=bottom text already showing switch hint */
 
+    /* picture display */
+    uint8_t  pic_mode;           /* 1=in picture display mode */
+    uint16_t pic_count;          /* number of pictures */
+    uint16_t pic_index;          /* current picture index */
+    char     pic_files[50][64];  /* picture file names */
+
     /* easter egg */
     uint8_t  egg_count;          /* number of files in current egg dir */
     uint8_t  egg_index;          /* current egg file index */
@@ -70,6 +76,15 @@ void spike_audio_manage(void);
 void spike_egg_load_dir(const char *dir);
 void spike_egg_play_random(void);
 void spike_egg_next(void);
+
+/* Picture display */
+void spike_pic_load_dir(void);
+void spike_pic_show_random(void);
+void spike_pic_show(uint16_t index);
+void spike_pic_enter(void);
+void spike_pic_exit(void);
+void spike_pic_next(void);
+void spike_pic_prev(void);
 void spike_state_transition(spike_state_t new_state);
 
 #endif

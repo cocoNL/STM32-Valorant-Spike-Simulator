@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F103xE</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\USER;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\MALLOC;..\FATFS\src;..\FATFS\exfuns;..\TEXT;..\APP;..\HALLIB\STM32F1xx_HAL_Driver\Inc;..\HARDWARE\LED;..\HARDWARE\LCD;..\HARDWARE\KEY;..\HARDWARE\SRAM;..\HARDWARE\SDIO;..\HARDWARE\SPI;..\HARDWARE\W25QXX;..\HARDWARE\VS10XX;..\HARDWARE\PWMDAC</IncludePath>
+              <IncludePath>..\CORE;..\USER;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\MALLOC;..\FATFS\src;..\FATFS\exfuns;..\TEXT;..\APP;..\HALLIB\STM32F1xx_HAL_Driver\Inc;..\HARDWARE\LED;..\HARDWARE\LCD;..\HARDWARE\KEY;..\HARDWARE\SRAM;..\HARDWARE\SDIO;..\HARDWARE\SPI;..\HARDWARE\W25QXX;..\HARDWARE\VS10XX;..\HARDWARE\PWMDAC;..\PICTURE</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -648,6 +648,31 @@
               <FileName>pwmdac.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\PWMDAC\pwmdac.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>PICTURE</GroupName>
+          <Files>
+            <File>
+              <FileName>piclib.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\PICTURE\piclib.c</FilePath>
+            </File>
+            <File>
+              <FileName>bmp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\PICTURE\bmp.c</FilePath>
+            </File>
+            <File>
+              <FileName>gif.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\PICTURE\gif.c</FilePath>
+            </File>
+            <File>
+              <FileName>tjpgd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\PICTURE\tjpgd.c</FilePath>
             </File>
           </Files>
         </Group>

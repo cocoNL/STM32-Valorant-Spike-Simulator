@@ -1,6 +1,7 @@
 #include "spike.h"
 #include "spike_audio.h"
 #include "pcm_data.h"
+#include "piclib.h"
 #include "vs10xx.h"
 #include "led.h"
 #include "key.h"
@@ -40,6 +41,7 @@ static void spike_update_display_time(const char *prefix);
 static uint32_t key_up_hold_ms(void);
 static uint32_t key1_hold_ms(void);
 static uint8_t key0_released(void);
+static uint8_t pic_key2_released(void);
 
 void spike_init(void)
 {
@@ -55,6 +57,7 @@ void spike_loop(void)
 {
     uint8_t key;
     uint32_t hold;
+    uint8_t k2_rel;
 
     spike_audio_feed();
     spike_audio_resume_if_needed(spike.countdown_elapsed);
@@ -70,6 +73,26 @@ void spike_loop(void)
     {
         uint32_t hold1 = key1_hold_ms();
         if (spike.state == STATE_DEFUSING) hold = hold1;
+    }
+
+    k2_rel = pic_key2_released();
+
+    /* Picture display mode: handle all keys, skip normal state machine */
+    if (spike.pic_mode) {
+        uint8_t k0 = key0_released();
+        if (key == WKUP_PRES) spike_pic_prev();
+        if (key == KEY1_PRES) spike_pic_next();
+        if (k2_rel) { spike_pic_exit(); k2_rel = 0; }
+        /* KEY0 egg switching still works in pic mode */
+        if (k0 && spike.main_audio_done) {
+            if (!spike.egg_playing) {
+                spike_egg_play_random();
+                spike.egg_playing = 1;
+            } else {
+                spike_egg_next();
+            }
+        }
+        return;  /* skip normal state machine */
     }
 
     spike_led_update();
@@ -196,9 +219,8 @@ void spike_loop(void)
 
     case STATE_DEFUSED: {
         uint8_t k0 = key0_released();
-        if (!spike_audio_is_busy() && !spike.main_audio_done) {
+        if (!spike_audio_is_busy() && !spike.main_audio_done)
             spike.main_audio_done = 1;
-        }
         if (k0 && spike.main_audio_done) {
             if (!spike.egg_playing) {
                 spike_egg_play_random();
@@ -207,14 +229,14 @@ void spike_loop(void)
                 spike_egg_next();
             }
         }
+        if (k2_rel) spike_pic_enter();
         break;
     }
 
     case STATE_DETONATED: {
         uint8_t k0 = key0_released();
-        if (!spike_audio_is_busy() && !spike.main_audio_done) {
+        if (!spike_audio_is_busy() && !spike.main_audio_done)
             spike.main_audio_done = 1;
-        }
         if (k0 && spike.main_audio_done) {
             if (!spike.egg_playing) {
                 spike_egg_play_random();
@@ -223,11 +245,13 @@ void spike_loop(void)
                 spike_egg_next();
             }
         }
+        if (k2_rel) spike_pic_enter();
         break;
     }
     }
 
-    spike_lcd_update();
+    if (!spike.pic_mode)
+        spike_lcd_update();
 }
 
 /*──────────────────────────────────────────────────────────────
@@ -371,6 +395,7 @@ static void spike_enter_state(spike_state_t new_state)
         Show_Str(BAR_X, 150, 400, 24, (uint8_t *)"\xB1\xAC\xC4\xDC\xC6\xF7\xD2\xD1\xB2\xF0\xB3\xFD", 24, 0);
         Show_Str(BAR_X, 180, 400, 24, (uint8_t *)"SPIKE DEFUSED", 24, 0);
         Show_Str(BAR_X, 210, 400, 24, (uint8_t *)"\xB0\xB4\x4B\x45\x59\x30\xB2\xA5\xB7\xC5\xB2\xCA\xB5\xB0", 24, 0);
+        Show_Str(BAR_X, 238, 400, 24, (uint8_t *)"\xB0\xB4\x4B\x45\x59\x32\xCF\xD4\xCA\xBE\xCD\xBC\xC6\xAC", 24, 0);
         break;
 
     case STATE_DETONATED:
@@ -386,6 +411,7 @@ static void spike_enter_state(spike_state_t new_state)
         Show_Str(BAR_X, 130, 400, 24, (uint8_t *)"\xB1\xAC\xC4\xDC\xC6\xF7\xD2\xD1\xC6\xF4\xB6\xAF", 24, 0);
         Show_Str(BAR_X, 160, 400, 24, (uint8_t *)"SPIKE DETONATED", 24, 0);
         Show_Str(BAR_X, 190, 400, 24, (uint8_t *)"\xB0\xB4\x4B\x45\x59\x30\xB2\xA5\xB7\xC5\xB2\xCA\xB5\xB0", 24, 0);
+        Show_Str(BAR_X, 218, 400, 24, (uint8_t *)"\xB0\xB4\x4B\x45\x59\x32\xCF\xD4\xCA\xBE\xCD\xBC\xC6\xAC", 24, 0);
         break;
     }
 }
@@ -547,4 +573,126 @@ void spike_egg_next(void)
     spike_audio_stop();
     while (spike_audio_is_busy()) spike_audio_feed();
     spike_audio_play_start(spike.egg_current);
+}
+
+/*──────────────────────────────────────────────────────────────
+ * Picture display
+ *──────────────────────────────────────────────────────────────*/
+static uint8_t pic_key2_released(void)
+{
+    static uint8_t was = 0;
+    uint8_t pressed = (KEY2 == 0);
+    uint8_t result = 0;
+    if (!pressed && was) result = 1;
+    was = pressed;
+    return result;
+}
+
+void spike_pic_load_dir(void)
+{
+    DIR picdir;
+    FILINFO fno;
+    FRESULT res;
+    uint16_t i = 0;
+    int flen;
+
+    spike.pic_count = 0;
+    spike.pic_index = 0;
+
+    res = f_opendir(&picdir, "0:/PICS");
+    if (res != FR_OK) return;
+
+    while (i < 50) {
+        res = f_readdir(&picdir, &fno);
+        if (res != FR_OK || fno.fname[0] == 0) break;
+        flen = strlen(fno.fname);
+        if (flen > 4 && fno.fname[flen-4] == '.'
+            && (fno.fname[flen-3] == 'b' || fno.fname[flen-3] == 'B')
+            && (fno.fname[flen-2] == 'm' || fno.fname[flen-2] == 'M')
+            && (fno.fname[flen-1] == 'p' || fno.fname[flen-1] == 'P')) {
+            strcpy(spike.pic_files[i], fno.fname);
+            i++;
+        }
+    }
+    spike.pic_count = i;
+    f_closedir(&picdir);
+}
+
+void spike_pic_show(uint16_t index)
+{
+    char path[128];
+    if (spike.pic_count == 0) return;
+    sprintf(path, "0:/PICS/%s", spike.pic_files[index]);
+
+    LCD_Clear(BLACK);
+    /* Image fills screen, text overlays at bottom */
+    ai_load_picfile((const u8 *)path, 0, 0, 480, 272, 1);
+
+    /* Three hint lines stacked at bottom, +28px from previous bottom */
+    LCD_Fill(0, 722, 480, 798, BLACK);
+    Show_Str(0, 724, 480, 24, (uint8_t *)"\x4B\x45\x59\x5F\x55\x50\xA3\xBA\xC9\xCF\xD2\xBB\xD5\xC5", 24, 0);
+    Show_Str(0, 748, 480, 24, (uint8_t *)"\x4B\x45\x59\x31\xA3\xBA\xCF\xC2\xD2\xBB\xD5\xC5", 24, 0);
+    Show_Str(0, 772, 480, 24, (uint8_t *)"\x4B\x45\x59\x32\xA3\xBA\xB9\xD8\xB1\xD5\xCD\xBC\xC6\xAC", 24, 0);
+}
+
+void spike_pic_show_random(void)
+{
+    if (spike.pic_count == 0) return;
+    spike.pic_index = ((uint32_t)HAL_GetTick() / 100) % spike.pic_count;
+    spike_pic_show(spike.pic_index);
+}
+
+void spike_pic_enter(void)
+{
+    spike.pic_mode = 1;
+    piclib_init();
+    spike_pic_load_dir();
+    spike_pic_show_random();
+}
+
+void spike_pic_exit(void)
+{
+    spike.pic_mode = 0;
+    /* Redraw state display without re-triggering audio/time reset */
+    LCD_Clear(COLOR_BG);
+    switch (spike.state) {
+    case STATE_DEFUSED:
+        spike_update_display_time("+");
+        Show_Str(BAR_X, 150, 400, 24, (uint8_t *)"\xB1\xAC\xC4\xDC\xC6\xF7\xD2\xD1\xB2\xF0\xB3\xFD", 24, 0);
+        Show_Str(BAR_X, 180, 400, 24, (uint8_t *)"SPIKE DEFUSED", 24, 0);
+        if (spike.egg_playing)
+            Show_Str(BAR_X, 210, 400, 24, (uint8_t *)"\xB0\xB4\x4B\x45\x59\x30\xC7\xD0\xBB\xBB\xB2\xCA\xB5\xB0", 24, 0);
+        else
+            Show_Str(BAR_X, 210, 400, 24, (uint8_t *)"\xB0\xB4\x4B\x45\x59\x30\xB2\xA5\xB7\xC5\xB2\xCA\xB5\xB0", 24, 0);
+        Show_Str(BAR_X, 238, 400, 24, (uint8_t *)"\xB0\xB4\x4B\x45\x59\x32\xCF\xD4\xCA\xBE\xCD\xBC\xC6\xAC", 24, 0);
+        break;
+    case STATE_DETONATED:
+        if (spike.was_defusing) spike_update_display_time("-");
+        Show_Str(BAR_X, 130, 400, 24, (uint8_t *)"\xB1\xAC\xC4\xDC\xC6\xF7\xD2\xD1\xC6\xF4\xB6\xAF", 24, 0);
+        Show_Str(BAR_X, 160, 400, 24, (uint8_t *)"SPIKE DETONATED", 24, 0);
+        if (spike.egg_playing)
+            Show_Str(BAR_X, 190, 400, 24, (uint8_t *)"\xB0\xB4\x4B\x45\x59\x30\xC7\xD0\xBB\xBB\xB2\xCA\xB5\xB0", 24, 0);
+        else
+            Show_Str(BAR_X, 190, 400, 24, (uint8_t *)"\xB0\xB4\x4B\x45\x59\x30\xB2\xA5\xB7\xC5\xB2\xCA\xB5\xB0", 24, 0);
+        Show_Str(BAR_X, 218, 400, 24, (uint8_t *)"\xB0\xB4\x4B\x45\x59\x32\xCF\xD4\xCA\xBE\xCD\xBC\xC6\xAC", 24, 0);
+        break;
+    default: break;
+    }
+}
+
+void spike_pic_next(void)
+{
+    if (spike.pic_count == 0) return;
+    spike.pic_index = (spike.pic_index + 1) % spike.pic_count;
+    spike_pic_show(spike.pic_index);
+}
+
+void spike_pic_prev(void)
+{
+    if (spike.pic_count == 0) return;
+    if (spike.pic_index == 0)
+        spike.pic_index = spike.pic_count - 1;
+    else
+        spike.pic_index--;
+    spike_pic_show(spike.pic_index);
 }
