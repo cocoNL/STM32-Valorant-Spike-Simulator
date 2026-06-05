@@ -44,6 +44,7 @@ typedef struct {
 
     /* picture display */
     uint8_t  pic_mode;           /* 1=in picture display mode */
+    int8_t   state_pic_idx;      /* current state pic index (-1=force redraw) */
     uint16_t pic_count;          /* number of pictures */
     uint16_t pic_index;          /* current picture index */
     char     pic_files[50][64];  /* picture file names */
@@ -78,6 +79,7 @@ void spike_egg_play_random(void);
 void spike_egg_next(void);
 
 /* Picture display */
+void spike_state_pics_load(void);
 void spike_pic_load_dir(void);
 void spike_pic_show_random(void);
 void spike_pic_show(uint16_t index);

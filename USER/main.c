@@ -45,6 +45,7 @@ int main(void)
     SRAM_Init();
     VS_Init();
     my_mem_init(SRAMIN);
+    my_mem_init(SRAMEX);  /* init external SRAM pool for state pics */
     exfuns_init();
 
     POINT_COLOR = BLACK;
@@ -77,6 +78,11 @@ int main(void)
     init_show("Audio: checking...");
     spike_audio_init();
     init_result("Audio: OK");
+
+    /* State pics */
+    init_show("Pics: loading...");
+    spike_state_pics_load();
+    init_result("Pics: OK");
 
     /* Eggs */
     init_show("Eggs: checking...");
