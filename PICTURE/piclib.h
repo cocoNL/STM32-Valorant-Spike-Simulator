@@ -44,7 +44,8 @@ typedef struct
 	void(*draw_point)(u16,u16,u32);			//void draw_point(u16 x,u16 y,u32 color)		    画点函数
  	void(*fill)(u16,u16,u16,u16,u32);		///void fill(u16 sx,u16 sy,u16 ex,u16 ey,u32 color) 单色填充函数 	 
  	void(*draw_hline)(u16,u16,u16,u16);		//void draw_hline(u16 x0,u16 y0,u16 len,u16 color)  画水平线函数	 
- 	void(*fillcolor)(u16,u16,u16,u16,u16*);	//void piclib_fill_color(u16 x,u16 y,u16 width,u16 height,u16 *color) 颜色填充
+ 	void(*fillcolor)(u16,u16,u16,u16,u16*);
+	void(*yield)(void);	//void piclib_fill_color(u16 x,u16 y,u16 width,u16 height,u16 *color) 颜色填充
 }_pic_phy; 
 
 extern _pic_phy pic_phy;

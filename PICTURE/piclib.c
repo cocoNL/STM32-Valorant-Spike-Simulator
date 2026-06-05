@@ -42,7 +42,8 @@ void piclib_init(void)
 	pic_phy.draw_point=LCD_Fast_DrawPoint;	//画点函数实现
 	pic_phy.fill=LCD_Fill;					//填充函数实现,仅GIF需要
 	pic_phy.draw_hline=piclib_draw_hline;  	//画线函数实现,仅GIF需要
-	pic_phy.fillcolor=piclib_fill_color;  	//颜色填充函数实现,仅TJPGD需要 
+	pic_phy.fillcolor=piclib_fill_color;
+	pic_phy.yield=0;  	//颜色填充函数实现,仅TJPGD需要 
 
 	picinfo.lcdwidth=lcddev.width;	//得到LCD的宽度像素
 	picinfo.lcdheight=lcddev.height;//得到LCD的高度像素

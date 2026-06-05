@@ -180,6 +180,7 @@ u8 stdbmp_decode(const u8 *filename)
 					countpix=0;
 					color=0x00;
 					rgb=0;
+					if(pic_phy.yield) pic_phy.yield();
 				}	 
 			} 		
 			res=f_read(f_bmp,databuf,readlen,(UINT *)&br);//¶Á³öreadlen¸ö×Ö½Ú

@@ -642,25 +642,24 @@ void spike_pic_show(uint16_t index)
     sprintf(path, "0:/PICS/%s", spike.pic_files[index]);
 
     LCD_Clear(BLACK);
-    /* Image fills screen */
-    ai_load_picfile((const u8 *)path, 0, 0, 480, 272, 1);
+    /* Draw text first, then load image */
 
     /* Extract filename without extension */
     strcpy(name, spike.pic_files[index]);
     dot = strrchr(name, '.');
-    if (dot) *dot = '\0';
-
-    /* Bottom overlay: counter + filename + three hint lines */
-    {
+    if (dot) *dot = 0;    {
         char cnt[16];
         sprintf(cnt, "%d / %d", index + 1, spike.pic_count);
         LCD_Fill(0, 674, 480, 798, BLACK);
         Show_Str(0, 676, 480, 24, (uint8_t *)cnt, 24, 0);
+        Show_Str(0, 700, 480, 24, (uint8_t *)name, 24, 0);
     }
-    Show_Str(0, 700, 480, 24, (uint8_t *)name, 24, 0);
-    Show_Str(0, 724, 480, 24, (uint8_t *)"\x4B\x45\x59\x5F\x55\x50\xA3\xBA\xC9\xCF\xD2\xBB\xD5\xC5", 24, 0);
-    Show_Str(0, 748, 480, 24, (uint8_t *)"\x4B\x45\x59\x31\xA3\xBA\xCF\xC2\xD2\xBB\xD5\xC5", 24, 0);
-    Show_Str(0, 772, 480, 24, (uint8_t *)"\x4B\x45\x59\x32\xA3\xBA\xB9\xD8\xB1\xD5\xCD\xBC\xC6\xAC", 24, 0);
+    Show_Str(0, 724, 480, 24, (uint8_t *)"KEY_UP：上一张", 24, 0);
+    Show_Str(0, 748, 480, 24, (uint8_t *)"KEY1：下一张", 24, 0);
+    Show_Str(0, 772, 480, 24, (uint8_t *)"KEY2：关闭图片", 24, 0);
+
+    /* Load image (fills area, text stays on top) */
+    ai_load_picfile((const u8 *)path, 0, 0, 480, 272, 1);
 }
 
 void spike_pic_show_random(void)
@@ -674,6 +673,7 @@ void spike_pic_enter(void)
 {
     spike.pic_mode = 1;
     piclib_init();
+    pic_phy.yield = spike_audio_feed;  /* feed audio during image decode */
     spike_pic_load_dir();
     spike_pic_show_random();
 }
