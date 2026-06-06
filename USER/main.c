@@ -54,7 +54,7 @@ int main(void)
     /* Draw title */
     POINT_COLOR = BLACK;
     LCD_Clear(WHITE);
-    g_y = 24;
+    g_y = 84;
     Show_Str(20, g_y, 440, 24, (uint8_t *)"\xCE\xDE\xCE\xB7\xC6\xF5\xD4\xBC\xB1\xAC\xC4\xDC\xC6\xF7\xC4\xA3\xC4\xE2", 24, 0);
     g_y += 32;
     Show_Str(20, g_y, 440, 24, (uint8_t *)"Valorant Spike Simulator", 24, 0);
