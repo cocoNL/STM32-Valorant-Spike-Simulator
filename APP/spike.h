@@ -80,6 +80,9 @@ void spike_egg_next(void);
 
 /* Picture display */
 uint8_t spike_state_pics_load(void);
+void spike_startup_gif_show(uint16_t frame);
+void spike_startup_gif_open(void);
+void spike_startup_gif_close(void);
 void spike_pic_load_dir(void);
 void spike_pic_show_random(void);
 void spike_pic_show(uint16_t index);
