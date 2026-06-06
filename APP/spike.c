@@ -732,9 +732,9 @@ void spike_pic_show(uint16_t index)
         Show_Str(0, 676, 480, 24, (uint8_t *)cnt, 24, 0);
         Show_Str(0, 700, 480, 24, (uint8_t *)name, 24, 0);
     }
-    Show_Str(0, 724, 480, 24, (uint8_t *)"KEY_UPО©╫О©╫О©╫О©╫р╩О©╫О©╫", 24, 0);
-    Show_Str(0, 748, 480, 24, (uint8_t *)"KEY1О©╫О©╫О©╫О©╫р╩О©╫О©╫", 24, 0);
-    Show_Str(0, 772, 480, 24, (uint8_t *)"KEY2О©╫О©╫О©╫ь╠О©╫м╪ф╛", 24, 0);
+    Show_Str(0, 724, 480, 24, (uint8_t *)"KEY_UPё╨иор╩уе", 24, 0);
+    Show_Str(0, 748, 480, 24, (uint8_t *)"KEY1ё╨обр╩уе", 24, 0);
+    Show_Str(0, 772, 480, 24, (uint8_t *)"KEY2ё╨╧ь╠ум╪ф╛", 24, 0);
 
     /* Load image (fills area, text stays on top) */
     ai_load_picfile((const u8 *)path, 0, 0, 480, 272, 1);
@@ -833,7 +833,7 @@ void spike_startup_gif_show(uint16_t frame)
     px = (uint16_t *)gif_buf;
 
     i = 0;
-    for (y = 272 - STARTUP_FRAME_H; y < 272; y++) {
+    for (y = 272 - STARTUP_FRAME_H + 450; y < 272 + 450; y++) {
         LCD_SetCursor((480 - STARTUP_FRAME_W) / 2, y);
         LCD_WriteRAM_Prepare();
         for (x = 0; x < STARTUP_FRAME_W; x++) {
