@@ -79,7 +79,7 @@ void spike_egg_play_random(void);
 void spike_egg_next(void);
 
 /* Picture display */
-void spike_state_pics_load(void);
+uint8_t spike_state_pics_load(void);
 void spike_pic_load_dir(void);
 void spike_pic_show_random(void);
 void spike_pic_show(uint16_t index);

@@ -588,7 +588,7 @@ static u16 *sram_pics[8];  /* pointers to pixel data in SRAM */
 static u16 sram_pic_w[8], sram_pic_h[8];  /* dimensions */
 
 /* Load all state pics from SD into external SRAM at init */
-void spike_state_pics_load(void)
+uint8_t spike_state_pics_load(void)
 {
     static const char *names[] = {
         "not_planted","planting","planted","half_defused",
@@ -615,6 +615,7 @@ void spike_state_pics_load(void)
             f_read(&f, sram_pics[i], wh[0] * wh[1] * 2, &br);
         f_close(&f);
     }
+    return (sram_pics[0] != NULL) ? 1 : 0;
 }
 
 static void spike_draw_state_pic(void)
@@ -731,9 +732,9 @@ void spike_pic_show(uint16_t index)
         Show_Str(0, 676, 480, 24, (uint8_t *)cnt, 24, 0);
         Show_Str(0, 700, 480, 24, (uint8_t *)name, 24, 0);
     }
-    Show_Str(0, 724, 480, 24, (uint8_t *)"KEY_UP£ºÉÏÒ»ÕÅ", 24, 0);
-    Show_Str(0, 748, 480, 24, (uint8_t *)"KEY1£ºÏÂÒ»ÕÅ", 24, 0);
-    Show_Str(0, 772, 480, 24, (uint8_t *)"KEY2£º¹Ø±ÕÍ¼Æ¬", 24, 0);
+    Show_Str(0, 724, 480, 24, (uint8_t *)"KEY_UPï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½", 24, 0);
+    Show_Str(0, 748, 480, 24, (uint8_t *)"KEY1ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½", 24, 0);
+    Show_Str(0, 772, 480, 24, (uint8_t *)"KEY2ï¿½ï¿½ï¿½Ø±ï¿½Í¼Æ¬", 24, 0);
 
     /* Load image (fills area, text stays on top) */
     ai_load_picfile((const u8 *)path, 0, 0, 480, 272, 1);
