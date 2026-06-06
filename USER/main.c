@@ -62,25 +62,29 @@ int main(void)
 
     spike_startup_gif_open();
 
-    /* Play every 2nd frame (40 frames) interlaced with init */
+    /* Audio init before playback */
+    spike_audio_init();
+    spike_audio_play_start("0:/SOUNDS/startup/startup.mp3");
+
+    /* Play every 2nd frame interlaced with init + audio feed */
     {
         uint16_t f;
-        for (f = 0; f < 10; f += 2) spike_startup_gif_show(f);
+        for (f = 0; f < 10; f += 2) { spike_startup_gif_show(f); spike_audio_feed(); }
     }
     if (sd_res != FR_OK) { init_line("SD: FAIL!"); while(1); }
 
-    spike_audio_init();
-    { uint16_t f; for (f = 10; f < 20; f += 2) spike_startup_gif_show(f); }
+    { uint16_t f; for (f = 10; f < 20; f += 2) { spike_startup_gif_show(f); spike_audio_feed(); } }
 
     if (!spike_state_pics_load()) { init_line("Pics: FAIL!"); while(1); }
-    { uint16_t f; for (f = 20; f < 30; f += 2) spike_startup_gif_show(f); }
+    { uint16_t f; for (f = 20; f < 30; f += 2) { spike_startup_gif_show(f); spike_audio_feed(); } }
 
     spike_egg_load_dir("0:/SOUNDS/Easter_eggs/defused");
     if (spike.egg_count == 0) { init_line("Eggs: FAIL!"); while(1); }
-    { uint16_t f; for (f = 30; f < 50; f += 2) spike_startup_gif_show(f); }
+    { uint16_t f; for (f = 30; f < 50; f += 2) { spike_startup_gif_show(f); spike_audio_feed(); } }
 
-    { uint16_t f; for (f = 50; f < 80; f += 2) spike_startup_gif_show(f); }
+    { uint16_t f; for (f = 50; f < 80; f += 2) { spike_startup_gif_show(f); spike_audio_feed(); } }
 
+    spike_audio_stop();
     spike_startup_gif_close();
 
     spike_init();
