@@ -60,22 +60,29 @@ int main(void)
     Show_Str(20, g_y, 440, 24, (uint8_t *)"Valorant Spike Simulator", 24, 0);
     g_y += 38;
 
-    /* SD card */
+    spike_startup_gif_open();
+
+    /* Play every 2nd frame (40 frames) interlaced with init */
+    {
+        uint16_t f;
+        for (f = 0; f < 10; f += 2) spike_startup_gif_show(f);
+    }
     if (sd_res != FR_OK) { init_line("SD: FAIL!"); while(1); }
 
-    /* Font already checked above */
-
-    /* Audio */
     spike_audio_init();
+    { uint16_t f; for (f = 10; f < 20; f += 2) spike_startup_gif_show(f); }
 
-    /* State pics */
     if (!spike_state_pics_load()) { init_line("Pics: FAIL!"); while(1); }
+    { uint16_t f; for (f = 20; f < 30; f += 2) spike_startup_gif_show(f); }
 
-    /* Eggs */
     spike_egg_load_dir("0:/SOUNDS/Easter_eggs/defused");
     if (spike.egg_count == 0) { init_line("Eggs: FAIL!"); while(1); }
+    { uint16_t f; for (f = 30; f < 50; f += 2) spike_startup_gif_show(f); }
 
-    delay_ms(2000);
+    { uint16_t f; for (f = 50; f < 80; f += 2) spike_startup_gif_show(f); }
+
+    spike_startup_gif_close();
+
     spike_init();
 
     while (1)

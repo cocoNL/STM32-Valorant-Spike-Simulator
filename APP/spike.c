@@ -794,6 +794,54 @@ void spike_pic_next(void)
     spike_pic_show(spike.pic_index);
 }
 
+#define STARTUP_FRAME_W  356
+#define STARTUP_FRAME_H  200
+#define STARTUP_FRAME_SZ (STARTUP_FRAME_W * STARTUP_FRAME_H * 2)
+
+static uint8_t *gif_buf;
+static FIL    gif_file;
+static uint8_t gif_file_open;
+
+void spike_startup_gif_open(void)
+{
+    gif_buf = (uint8_t *)mymalloc(SRAMEX, STARTUP_FRAME_SZ);
+    gif_file_open = 0;
+}
+
+void spike_startup_gif_close(void)
+{
+    if (gif_file_open) f_close(&gif_file);
+    if (gif_buf) { myfree(SRAMEX, gif_buf); gif_buf = NULL; }
+}
+
+void spike_startup_gif_show(uint16_t frame)
+{
+    UINT br;
+    uint16_t x, y, i;
+    uint16_t *px;
+
+    if (!gif_buf) return;
+
+    if (!gif_file_open) {
+        if (f_open(&gif_file, "0:/PICS/startup/all.bin", FA_READ) != FR_OK) return;
+        gif_file_open = 1;
+    }
+
+    /* Seek to frame: 4-byte header + frame * frame_size */
+    f_lseek(&gif_file, 4 + (DWORD)STARTUP_FRAME_SZ * frame);
+    f_read(&gif_file, gif_buf, STARTUP_FRAME_SZ, &br);
+    px = (uint16_t *)gif_buf;
+
+    i = 0;
+    for (y = 272 - STARTUP_FRAME_H; y < 272; y++) {
+        LCD_SetCursor((480 - STARTUP_FRAME_W) / 2, y);
+        LCD_WriteRAM_Prepare();
+        for (x = 0; x < STARTUP_FRAME_W; x++) {
+            LCD_WriteRAM(px[i++]);
+        }
+    }
+}
+
 void spike_pic_prev(void)
 {
     if (spike.pic_count == 0) return;
