@@ -17,24 +17,16 @@
 
 static uint16_t g_y;
 
-/* Print a line and move down */
-static void init_show(const char *msg)
+static void init_line(const char *msg)
 {
     Show_Str(10, g_y, 460, 24, (uint8_t *)msg, 24, 0);
-    g_y += 30;
-}
-
-/* Overwrite current line (used to show result after check) */
-static void init_result(const char *msg)
-{
-    g_y -= 30;
-    LCD_Fill(10, g_y, 470, g_y + 28, WHITE);
-    Show_Str(10, g_y, 460, 24, (uint8_t *)msg, 24, 0);
-    g_y += 30;
+    g_y += 28;
 }
 
 int main(void)
 {
+    FRESULT sd_res;
+
     HAL_Init();
     Stm32_Clock_Init(RCC_PLL_MUL9);
     delay_init(72);
@@ -45,55 +37,45 @@ int main(void)
     SRAM_Init();
     VS_Init();
     my_mem_init(SRAMIN);
-    my_mem_init(SRAMEX);  /* init external SRAM pool for state pics */
+    my_mem_init(SRAMEX);
     exfuns_init();
 
+    f_mount(fs[1], "1:", 1);  /* SPI Flash for font */
+    sd_res = f_mount(fs[0], "0:", 1);  /* SD card */
+
+    /* Font init (may update from SD if needed) */
+    if (font_init() != 0) {
+        POINT_COLOR = RED;
+        LCD_Clear(WHITE);
+        Show_Str(10, 50, 460, 24, (uint8_t *)"Font: FAIL!", 24, 0);
+        while(1);
+    }
+
+    /* Draw title */
     POINT_COLOR = BLACK;
     LCD_Clear(WHITE);
-    g_y = 10;
-
-    init_show("Sys Init OK");
+    g_y = 24;
+    Show_Str(20, g_y, 440, 24, (uint8_t *)"\xCE\xDE\xCE\xB7\xC6\xF5\xD4\xBC\xB1\xAC\xC4\xDC\xC6\xF7\xC4\xA3\xC4\xE2", 24, 0);
+    g_y += 32;
+    Show_Str(20, g_y, 440, 24, (uint8_t *)"Valorant Spike Simulator", 24, 0);
+    g_y += 38;
 
     /* SD card */
-    init_show("SD: checking...");
-    if (f_mount(fs[0], "0:", 1) == FR_OK)
-        init_result("SD: OK");
-    else {
-        init_result("SD: FAIL!");
-        while(1);
-    }
+    if (sd_res != FR_OK) { init_line("SD: FAIL!"); while(1); }
 
-    f_mount(fs[1], "1:", 1);
-
-    /* Font */
-    init_show("Font: checking...");
-    if (font_init() == 0)
-        init_result("Font: OK");
-    else {
-        init_result("Font: FAIL!");
-        while(1);
-    }
+    /* Font already checked above */
 
     /* Audio */
-    init_show("Audio: checking...");
     spike_audio_init();
-    init_result("Audio: OK");
 
     /* State pics */
-    init_show("Pics: loading...");
-    spike_state_pics_load();
-    init_result("Pics: OK");
+    if (!spike_state_pics_load()) { init_line("Pics: FAIL!"); while(1); }
 
     /* Eggs */
-    init_show("Eggs: checking...");
     spike_egg_load_dir("0:/SOUNDS/Easter_eggs/defused");
-    init_result("Eggs: OK");
+    if (spike.egg_count == 0) { init_line("Eggs: FAIL!"); while(1); }
 
-    /* Done */
-    init_show("All OK! Starting...");
     delay_ms(2000);
-    LCD_Clear(WHITE);
-
     spike_init();
 
     while (1)
