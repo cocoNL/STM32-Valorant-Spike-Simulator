@@ -40,7 +40,7 @@ void W25QXX_Init(void)
     
 	W25QXX_CS=1;			                //SPI FLASH不选中
 	SPI2_Init();		   			        //初始化SPI
-	SPI2_SetSpeed(SPI_BAUDRATEPRESCALER_2); //设置为42M时钟,高速模式
+	SPI2_SetSpeed(SPI_BAUDRATEPRESCALER_4); //设置为42M时钟,高速模式
 	W25QXX_TYPE=W25QXX_ReadID();	        //读取FLASH ID.
     if(W25QXX_TYPE==W25Q256)                //SPI FLASH为W25Q256
     {
