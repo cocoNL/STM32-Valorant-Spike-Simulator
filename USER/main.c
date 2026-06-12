@@ -45,10 +45,14 @@ int main(void)
 
     /* Font init (may update from SD if needed) */
     if (font_init() != 0) {
-        POINT_COLOR = RED;
-        LCD_Clear(WHITE);
-        Show_Str(10, 50, 460, 24, (uint8_t *)"Font: FAIL!", 24, 0);
-        while(1);
+        /* Fonts not in SPI Flash, update from SD card */
+        update_font(20, 100, 16, (u8 *)"0:");
+        if (font_init() != 0) {
+            POINT_COLOR = RED;
+            LCD_Clear(WHITE);
+            Show_Str(10, 50, 460, 24, (uint8_t *)"Font: FAIL!", 24, 0);
+            while(1);
+        }
     }
 
     /* Draw title */
