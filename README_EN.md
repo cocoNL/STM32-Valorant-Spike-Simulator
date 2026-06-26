@@ -38,7 +38,7 @@ This project simulates the classic Spike gameplay from *Valorant*: the attackers
 
 **Defused**: The countdown stops and the remaining time is displayed. Press and release KEY0 to play a random easter egg audio clip. Release KEY0 again to switch to the next track.
 
-![](assets/naikang.jpg "Let's gooooooo!")
+![](assets/naikang.jpg)  Let's gooooooo!
 
 **Detonation**: If the 45 seconds expire before defusal completes, the screen shows how much additional defuse time would have been needed (if defusing was in progress) or nothing (if no defuse attempt was active). A detonation sound plays and the red LED stays solid. You can also trigger a different set of easter egg audio clips with KEY0.
 
