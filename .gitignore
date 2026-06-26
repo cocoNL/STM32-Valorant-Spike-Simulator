@@ -27,3 +27,8 @@ JLinkSettings.ini
 # Editor files
 *.uvguix.*
 *.scvd
+
+# Planning files (auto-generated, do not commit)
+task_plan.md
+progress.md
+findings.md
