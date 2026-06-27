@@ -23,6 +23,7 @@
 - [代码结构](#代码结构)
 - [致谢](#致谢)
 - [许可证](#许可证)
+- [Star History ⭐](#star-history-)
 
 ## 玩法机制
 
@@ -68,30 +69,6 @@
 3. **打开工程**：在 Keil uVision5 中打开 `USER/ValorantSpike.uvprojx`，编译器选 ARM Compiler v5
 4. **编译烧录**：`Build` → `Download`，程序通过 ST-LINK 写入开发板
 5. **上电运行**：按键复位，屏幕显示启动动画后进入主程序
-
-## SD 卡文件结构
-
-```
-SD:\
-├── SOUNDS\
-│   ├── planting.mp3
-│   ├── planted.mp3
-│   ├── defuse_start_1.mp3
-│   ├── defuse_start_2.mp3
-│   ├── defused.mp3
-│   ├── boom.mp3
-│   ├── startup\
-│   │   └── startup.mp3
-│   └── Easter_eggs\
-│       ├── defused\        (拆除成功彩蛋 *.mp3)
-│       └── detonated\      (引爆彩蛋 *.mp3)
-├── SYSTEM\
-│   └── FONT\               (GBK12/16/24.FON + UNIGBK.BIN)
-├── PICS\
-│   ├── spike_pics\         (状态指示图 *.bin)
-│   ├── startup\            (开机动画帧 all.bin)
-│   └── *.bmp               (图片浏览用 BMP)
-```
 
 ## 程序特点
 
@@ -151,9 +128,37 @@ SYSTEM/              — 时钟、延时、串口
 MALLOC/              — 内部+外部 SRAM 内存池
 ```
 
+## SD 卡文件结构
+
+```
+SD:\
+├── SOUNDS\
+│   ├── planting.mp3
+│   ├── planted.mp3
+│   ├── defuse_start_1.mp3
+│   ├── defuse_start_2.mp3
+│   ├── defused.mp3
+│   ├── boom.mp3
+│   ├── startup\
+│   │   └── startup.mp3
+│   └── Easter_eggs\
+│       ├── defused\        (拆除成功彩蛋 *.mp3)
+│       └── detonated\      (引爆彩蛋 *.mp3)
+├── SYSTEM\
+│   └── FONT\               (GBK12/16/24.FON + UNIGBK.BIN)
+├── PICS\
+│   ├── spike_pics\         (状态指示图 *.bin)
+│   ├── startup\            (开机动画帧 all.bin)
+│   └── *.bmp               (图片浏览用 BMP)
+```
+
 ## 致谢
 
 本项目应用层代码（`APP/`、`USER/main.c`）为独立开发。底层驱动（`HARDWARE/`、`SYSTEM/`、`FATFS/`、`MALLOC/`、`TEXT/`、`PICTURE/`）及 HAL 库（`HALLIB/`）参考了 STMicroelectronics 官方固件库和正点原子（ALIENTEK）战舰系列开发板例程，各源文件头部保留了原作者版权声明。
+
+## Star History ⭐
+
+[![Star History Chart](https://api.star-history.com/svg?repos=cocoNL/STM32-Valorant-Spike-Simulator&type=Date)](https://star-history.com/#cocoNL/STM32-Valorant-Spike-Simulator&Date)
 
 ## 许可证
 

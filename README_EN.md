@@ -23,6 +23,7 @@
 - [Code Structure](#code-structure)
 - [Acknowledgments](#acknowledgments)
 - [License](#license)
+- [Star History ⭐](#star-history-)
 
 ## Gameplay
 
@@ -68,30 +69,6 @@ This project simulates the classic Spike gameplay from *Valorant*: the attackers
 3. **Open the project**: Launch Keil uVision5 and open `USER/ValorantSpike.uvprojx` with ARM Compiler v5 selected
 4. **Build and flash**: `Build` → `Download` (or press F8) to write the program via ST-LINK
 5. **Power on and run**: Press reset; the boot animation appears, followed by the main program
-
-## SD Card Layout
-
-```
-SD:\
-├── SOUNDS\
-│   ├── planting.mp3
-│   ├── planted.mp3
-│   ├── defuse_start_1.mp3
-│   ├── defuse_start_2.mp3
-│   ├── defused.mp3
-│   ├── boom.mp3
-│   ├── startup\
-│   │   └── startup.mp3
-│   └── Easter_eggs\
-│       ├── defused\        (success easter egg mp3s)
-│       └── detonated\      (failure easter egg mp3s)
-├── SYSTEM\
-│   └── FONT\               (GBK12/16/24.FON + UNIGBK.BIN)
-├── PICS\
-│   ├── spike_pics\         (state indicator images, *.bin)
-│   ├── startup\            (boot animation frames, all.bin)
-│   └── *.bmp               (user pictures for the photo browser)
-```
 
 ## Program Features
 
@@ -151,6 +128,30 @@ SYSTEM/              — clock, delay, USART
 MALLOC/              — internal + external SRAM memory pools
 ```
 
+## SD Card Layout
+
+```
+SD:\
+├── SOUNDS\
+│   ├── planting.mp3
+│   ├── planted.mp3
+│   ├── defuse_start_1.mp3
+│   ├── defuse_start_2.mp3
+│   ├── defused.mp3
+│   ├── boom.mp3
+│   ├── startup\
+│   │   └── startup.mp3
+│   └── Easter_eggs\
+│       ├── defused\        (success easter egg mp3s)
+│       └── detonated\      (failure easter egg mp3s)
+├── SYSTEM\
+│   └── FONT\               (GBK12/16/24.FON + UNIGBK.BIN)
+├── PICS\
+│   ├── spike_pics\         (state indicator images, *.bin)
+│   ├── startup\            (boot animation frames, all.bin)
+│   └── *.bmp               (user pictures for the photo browser)
+```
+
 ## Acknowledgments
 
 The application-layer code (`APP/`, `USER/main.c`) was developed independently. The low-level drivers (`HARDWARE/`, `SYSTEM/`, `FATFS/`, `MALLOC/`, `TEXT/`, `PICTURE/`) and HAL library (`HALLIB/`) reference official STMicroelectronics firmware libraries and ALIENTEK Warship series example code. Original copyright notices are preserved in each source file header.
@@ -160,3 +161,7 @@ The application-layer code (`APP/`, `USER/main.c`) was developed independently. 
 The **application code** (`APP/`, `USER/main.c`) is released under the **MIT** license.
 
 Low-level drivers, middleware, and HAL library files (`HARDWARE/`, `SYSTEM/`, `FATFS/`, `MALLOC/`, `TEXT/`, `PICTURE/`, `HALLIB/`, `CORE/`) originate from STMicroelectronics, ALIENTEK, and other open-source projects. Original copyright notices and license terms remain in each source file header.
+
+## Star History ⭐
+
+[![Star History Chart](https://api.star-history.com/svg?repos=cocoNL/STM32-Valorant-Spike-Simulator&type=Date)](https://star-history.com/#cocoNL/STM32-Valorant-Spike-Simulator&Date)
