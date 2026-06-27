@@ -7,7 +7,7 @@
 
 ![](assets/SI2.jpg)
 
-> **演示视频**：待补充（上传后添加链接）
+> **演示视频**：https://www.bilibili.com/video/BV1ia7L6EEi1
 
 ## 目录
 
