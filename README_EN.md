@@ -7,7 +7,7 @@
 
 ![](assets/SI2.jpg)
 
-> **Demo Video**: To be added
+> **Demo Video**: https://www.bilibili.com/video/BV1ia7L6EEi1
 
 ## Table of Contents
 
