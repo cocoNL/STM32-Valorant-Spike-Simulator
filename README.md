@@ -156,12 +156,12 @@ SD:\
 
 本项目应用层代码（`APP/`、`USER/main.c`）为独立开发。底层驱动（`HARDWARE/`、`SYSTEM/`、`FATFS/`、`MALLOC/`、`TEXT/`、`PICTURE/`）及 HAL 库（`HALLIB/`）参考了 STMicroelectronics 官方固件库和正点原子（ALIENTEK）战舰系列开发板例程，各源文件头部保留了原作者版权声明。
 
-## Star History ⭐
-
-[![Star History Chart](https://api.star-history.com/svg?repos=cocoNL/STM32-Valorant-Spike-Simulator&type=Date)](https://star-history.com/#cocoNL/STM32-Valorant-Spike-Simulator&Date)
-
 ## 许可证
 
 本项目**应用程序代码**（`APP/`、`USER/main.c`）以 **MIT** 许可证发布。
 
 底层驱动、中间件及 HAL 库文件（`HARDWARE/`、`SYSTEM/`、`FATFS/`、`MALLOC/`、`TEXT/`、`PICTURE/`、`HALLIB/`、`CORE/`）来源于 STMicroelectronics、正点原子及其他开源项目，各源文件头部保留了原作者的版权声明和许可证条款。
+
+## Star History ⭐
+
+[![Star History Chart](https://api.star-history.com/svg?repos=cocoNL/STM32-Valorant-Spike-Simulator&type=Date)](https://star-history.com/#cocoNL/STM32-Valorant-Spike-Simulator&Date)
