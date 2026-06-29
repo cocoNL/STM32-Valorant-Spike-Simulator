@@ -1,6 +1,6 @@
 # Valorant Spike Simulator
 
-> Simulates the Spike device from *Valorant* on an STM32 microcontroller — plant, defuse, detonate, with real-time countdown, LED blink patterns, LCD progress bars, audio feedback, and an easter egg system.
+> Simulates the Spike device from *Valorant* on an STM32 microcontroller — plant, defuse, detonate, with LCD display, LED blink patterns, audio feedback, and an easter egg system.
 > Built on the **ALIENTEK Warship V3** development board (STM32F103ZET6).
 
 [简体中文](./README.md)
