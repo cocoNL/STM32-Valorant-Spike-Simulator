@@ -51,20 +51,20 @@
 |------|------|
 | 开发板 | 正点原子 战舰V3 |
 | 主控 | STM32F103ZET6（Cortex-M3, 72MHz） |
-| 屏幕 | 4.3" TFT-LCD（480×272, FSMC） |
+| 屏幕 | 4.3" TFT-LCD（480×800, FSMC） |
 | 音频 | VS1053B → TDA1308T → 3.5mm PHONE 口 |
-| 存储 | Micro SD 卡（SDIO + FatFS） |
+| 存储 | SD 卡（SDIO + FatFS） |
 | 烧录 | ST-LINK（SWD） |
 
 ## 外设连接方法
 
-- **SD 卡**：插入开发板侧面的 Micro SD 卡槽，金属触点朝下。首次使用前需按上述结构存放文件
+- **SD 卡**：插入开发板侧面的 SD 卡槽，金属触点朝下。首次使用前需按上述结构存放文件
 - **音箱/耳机**：将 3.5mm 插头插入开发板的 **PHONE** 口（注意不是 LINE_IN）。如使用带 USB 供电的音箱，USB 端接任意 5V 电源
 - **电源**：开发板需 12V 1A 外接电源供电（4.3 寸屏功耗较大，USB 供电可能不足）
 
 ## 快速开始
 
-1. **准备 SD 卡**：将一张 Micro SD 卡按上述文件结构放入所有音频、字库和图片文件，插入开发板卡槽
+1. **准备 SD 卡**：将一张 SD 卡按[文件结构](#sd-卡文件结构)放入所有音频、字库和图片文件，插入开发板卡槽。文件也可从此网盘下载：https://pan.baidu.com/s/12ytke2aKPCs2u-2OERI2Iw（提取码：zdjd）
 2. **连接设备**：PHONE 口插上耳机或音箱，接好 ST-LINK 烧录器和 12V 电源
 3. **打开工程**：在 Keil uVision5 中打开 `USER/ValorantSpike.uvprojx`，编译器选 ARM Compiler v5
 4. **编译烧录**：`Build` → `Download`，程序通过 ST-LINK 写入开发板

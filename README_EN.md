@@ -51,20 +51,20 @@ This project simulates the classic Spike gameplay from *Valorant*: the attackers
 |-----------|------|
 | Board | ALIENTEK Warship V3 |
 | MCU | STM32F103ZET6 (Cortex-M3, 72 MHz) |
-| Display | 4.3" TFT-LCD (480×272, FSMC) |
+| Display | 4.3" TFT-LCD (480×800, FSMC) |
 | Audio | VS1053B → TDA1308T → 3.5 mm PHONE jack |
-| Storage | Micro SD card (SDIO + FatFS) |
+| Storage | SD card (SDIO + FatFS) |
 | Debug/Flash | ST-LINK (SWD) |
 
 ## Peripheral Setup
 
-- **SD Card**: Insert into the Micro SD slot on the side of the board (contacts facing down). Populate it with the file structure shown below before first use.
+- **SD Card**: Insert into the SD slot on the side of the board (contacts facing down). Populate it with the file structure shown below before first use.
 - **Speaker / Headphones**: Plug a 3.5 mm cable into the **PHONE** jack (not LINE_IN). If using USB-powered speakers, connect the USB cable to any 5 V power source.
 - **Power**: The board requires a 12 V 1 A external power supply. The 4.3" LCD draws significant current; USB power alone may be insufficient.
 
 ## Quick Start
 
-1. **Prepare the SD card**: Place all audio, font, and image files on a Micro SD card following the directory structure below, then insert it into the board
+1. **Prepare the SD card**: Place all audio, font, and image files on an SD card following the [directory structure](#sd-card-layout), then insert it into the board. Files are also available via Baidu Netdisk: https://pan.baidu.com/s/12ytke2aKPCs2u-2OERI2Iw (code: zdjd)
 2. **Connect peripherals**: Plug headphones or speakers into the PHONE jack, connect the ST-LINK programmer and the 12 V power supply
 3. **Open the project**: Launch Keil uVision5 and open `USER/ValorantSpike.uvprojx` with ARM Compiler v5 selected
 4. **Build and flash**: `Build` → `Download` (or press F8) to write the program via ST-LINK
