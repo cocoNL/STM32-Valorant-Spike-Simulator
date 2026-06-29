@@ -64,7 +64,7 @@ This project simulates the classic Spike gameplay from *Valorant*: the attackers
 
 ## Quick Start
 
-1. **Prepare the SD card**: Place all audio, font, and image files on an SD card following the [directory structure](#sd-card-layout), then insert it into the board. Files are also available via Baidu Netdisk: https://pan.baidu.com/s/12ytke2aKPCs2u-2OERI2Iw (code: zdjd)
+1. **Prepare the SD card**: Place all audio, font, and image files on an SD card following the [directory structure](#sd-card-layout), then insert it into the board. Files are also available via Baidu Netdisk: https://pan.baidu.com/s/12ytke2aKPCs2u-2OERI2Iw  code: zdjd
 2. **Connect peripherals**: Plug headphones or speakers into the PHONE jack, connect the ST-LINK programmer and the 12 V power supply
 3. **Open the project**: Launch Keil uVision5 and open `USER/ValorantSpike.uvprojx` with ARM Compiler v5 selected
 4. **Build and flash**: `Build` → `Download` (or press F8) to write the program via ST-LINK

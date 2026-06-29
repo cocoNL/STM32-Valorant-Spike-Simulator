@@ -64,7 +64,7 @@
 
 ## 快速开始
 
-1. **准备 SD 卡**：将一张 SD 卡按[文件结构](#sd-卡文件结构)放入所有音频、字库和图片文件，插入开发板卡槽。文件也可从此网盘下载：https://pan.baidu.com/s/12ytke2aKPCs2u-2OERI2Iw（提取码：zdjd）
+1. **准备 SD 卡**：将一张 SD 卡按[文件结构](#sd-卡文件结构)放入所有音频、字库和图片文件，插入开发板卡槽。文件也可从此网盘下载：https://pan.baidu.com/s/12ytke2aKPCs2u-2OERI2Iw  提取码：zdjd
 2. **连接设备**：PHONE 口插上耳机或音箱，接好 ST-LINK 烧录器和 12V 电源
 3. **打开工程**：在 Keil uVision5 中打开 `USER/ValorantSpike.uvprojx`，编译器选 ARM Compiler v5
 4. **编译烧录**：`Build` → `Download`，程序通过 ST-LINK 写入开发板
