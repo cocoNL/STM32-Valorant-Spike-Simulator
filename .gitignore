@@ -23,6 +23,7 @@ JLinkSettings.ini
 *.htm
 *.map
 *.bin
+!SDCARD_CONTENTS/**/*.bin
 
 # Editor files
 *.uvguix.*

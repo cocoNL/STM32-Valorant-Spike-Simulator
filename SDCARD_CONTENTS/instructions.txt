@@ -1,0 +1,57 @@
+*本项目所用素材均源自网络。
+
+SD卡使用说明：
+
+将"SOUNDS\", "SYSTEM\", "PICS\"三个文件夹复制到SD卡**根目录**。无需复制本说明或其他文件。
+
+SD 卡文件结构：
+
+SD:\
+├── SOUNDS\
+│   ├── planting.mp3
+│   ├── planted.mp3
+│   ├── defuse_start_1.mp3
+│   ├── defuse_start_2.mp3
+│   ├── defused.mp3
+│   ├── boom.mp3
+│   ├── startup\
+│   │   └── startup.mp3
+│   └── Easter_eggs\
+│       ├── defused\        (拆除成功彩蛋 *.mp3)
+│       └── detonated\      (引爆彩蛋 *.mp3)
+├── SYSTEM\
+│   └── FONT\               (GBK12/16/24.FON + UNIGBK.BIN)
+├── PICS\
+│   ├── spike_pics\         (状态指示图 *.bin)
+│   ├── startup\            (开机动画帧 all.bin)
+│   └── *.bmp               (图片浏览用 BMP)
+
+
+
+*The materials used in this project are all sourced from the internet.
+
+SD card usage instructions:
+
+Copy the three folders "SOUNDS\", "SYSTEM\", and "PICS\" to the **root directory** of the SD card. There is no need to copy this instruction file or other files.
+
+SD card file structure:
+
+SD:\
+├── SOUNDS\
+│   ├── planting.mp3
+│   ├── planted.mp3
+│   ├── defuse_start_1.mp3
+│   ├── defuse_start_2.mp3
+│   ├── defused.mp3
+│   ├── boom.mp3
+│   ├── startup\
+│   │   └── startup.mp3
+│   └── Easter_eggs\
+│       ├── defused\        (defuse success Easter eggs *.mp3)
+│       └── detonated\      (detonation Easter eggs *.mp3)
+├── SYSTEM\
+│   └── FONT\               (GBK12/16/24.FON + UNIGBK.BIN)
+├── PICS\
+│   ├── spike_pics\         (status indicator images *.bin)
+│   ├── startup\            (boot animation frames all.bin)
+│   └── *.bmp               (BMP files for image browsing)
