@@ -15,12 +15,12 @@
 - [Hardware](#hardware)
 - [Peripheral Setup](#peripheral-setup)
 - [Quick Start](#quick-start)
-- [SD Card Layout](#sd-card-layout)
 - [Program Features](#program-features)
 - [Screenshots](#screenshots)
 - [Controls](#controls)
 - [Notes](#notes)
 - [Code Structure](#code-structure)
+- [SD Card Layout](#sd-card-layout)
 - [Acknowledgments](#acknowledgments)
 - [License](#license)
 - [Star History ⭐](#star-history-)
@@ -58,13 +58,13 @@ This project simulates the classic Spike gameplay from *Valorant*: the attackers
 
 ## Peripheral Setup
 
-- **SD Card**: Insert into the SD slot on the side of the board (contacts facing down). Populate it with the file structure shown below before first use.
+- **SD Card**: Insert into the SD slot on the side of the board (contacts facing down). Populate it with the [file structure](#sd-card-layout) before first use.
 - **Speaker / Headphones**: Plug a 3.5 mm cable into the **PHONE** jack (not LINE_IN). If using USB-powered speakers, connect the USB cable to any 5 V power source.
 - **Power**: The board requires a 12 V 1 A external power supply. The 4.3" LCD draws significant current; USB power alone may be insufficient.
 
 ## Quick Start
 
-1. **Prepare the SD card**: Place all audio, font, and image files on an SD card following the [directory structure](#sd-card-layout), then insert it into the board. Files are also available via Baidu Netdisk: https://pan.baidu.com/s/12ytke2aKPCs2u-8OERI2Iw  code: zdjd
+1. **Prepare the SD card**: Copy the `SOUNDS\`, `SYSTEM\`, and `PICS\` folders from the [`SDCARD_CONTENTS/`](./SDCARD_CONTENTS/) directory in the repository to the root of an SD card following the [directory structure](#sd-card-layout), then insert it into the board.
 2. **Connect peripherals**: Plug headphones or speakers into the PHONE jack, connect the ST-LINK programmer and the 12 V power supply
 3. **Open the project**: Launch Keil uVision5 and open `USER/ValorantSpike.uvprojx` with ARM Compiler v5 selected
 4. **Build and flash**: `Build` → `Download` (or press F8) to write the program via ST-LINK
@@ -112,7 +112,6 @@ This project simulates the classic Spike gameplay from *Valorant*: the attackers
 - **First boot**: If no font library is present in W25Q128 SPI Flash, the system will auto-restore it from the SD card. The screen will show an update progress bar for about 5–10 seconds
 - **SD card required**: The SD card must be inserted before power-on; otherwise the system halts at the init stage with `SD: FAIL!` on screen
 - **Image format**: The picture browser only supports BMP files. Convert PNG and JPG images to BMP before placing them in the `PICS/` directory
-- **Optional files**: `startup.mp3`, easter egg MP3s, and `spike_pics/*.bin` are optional — missing files will be silently skipped without errors
 - **Audio output**: All audio plays through the **PHONE** jack. The onboard speaker remains muted in this project
 
 ## Code Structure
@@ -126,6 +125,7 @@ TEXT/                — GBK font rendering with auto-update from SD
 PICTURE/             — BMP/GIF/JPEG decoder library
 SYSTEM/              — clock, delay, USART
 MALLOC/              — internal + external SRAM memory pools
+SDCARD_CONTENTS/     — SD card file assets
 ```
 
 ## SD Card Layout
